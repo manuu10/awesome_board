@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "754505533361",
+    "project_id": "awesomeboard-3fd13",
+    "storage_bucket": "awesomeboard-3fd13.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754505533361:android:dba6041dc16043c970df90",
+        "android_client_info": {
+          "package_name": "com.manu.awesome_board"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "754505533361-t61hfakrj1rq9na70iujuej2m6alprvp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvxc3nr7tJ5v9cY33pi8-6NJ_Ru9A7av8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "754505533361-t61hfakrj1rq9na70iujuej2m6alprvp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
