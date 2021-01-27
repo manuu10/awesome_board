@@ -2,6 +2,7 @@ import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/models/problem.dart';
 import 'package:awesome_board/models/utils.dart';
 import 'package:awesome_board/screens/led_tester_screen.dart';
+import 'package:awesome_board/screens/settings_heatmap_screen.dart';
 import 'package:awesome_board/screens/settings_specify_custom_board_holds_screen.dart';
 import 'package:awesome_board/screens/settings_specify_holds_screen.dart';
 import 'package:awesome_board/services/json_service.dart';
@@ -127,6 +128,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           insetPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 30),
           backgroundColor: _theme.background,
           child: SettingsSpecifyCustomHoldsScreen(),
+        );
+      },
+    );
+  }
+
+  void openHeatmap() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 30),
+          backgroundColor: _theme.background,
+          child: SettingsHeatmapScreen(),
         );
       },
     );
@@ -322,6 +336,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             color: _theme.linksColor,
                           ),
                         ],
+                      ),
+                    ),
+                    CustomCard(
+                      onPress: openHeatmap,
+                      headChild: GradientIcon(
+                        Icons.analytics,
+                        24,
+                        _theme.secondaryLinearGradient,
+                      ),
+                      child: Text(
+                        "Heatmap",
+                        style: TextStyle(color: _theme.foreground),
                       ),
                     ),
                     Row(

@@ -70,6 +70,20 @@ class Utils {
     return problems;
   }
 
+  static Map<int, int> holdHeatMap(List<Problem> problems) {
+    Map<int, int> map = Map<int, int>();
+    for (var p in problems) {
+      for (var i in p.holdIndexesOnly()) {
+        if (map.containsKey(i))
+          map[i]++;
+        else
+          map[i] = 1;
+      }
+    }
+    int toll = 1;
+    return map;
+  }
+
   static bool listContainsList(List<List<Point>> lists, List<Point> list) {
     bool retVal = false;
     lists.forEach((e) {

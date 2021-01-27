@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/models/problem.dart';
 import 'package:awesome_board/models/utils.dart';
@@ -26,6 +28,7 @@ class _SettingsSpecifyCustomHoldsScreenState extends State<SettingsSpecifyCustom
     super.initState();
     _box = Hive.box("settings");
     List<int> flippedIndexHolds = Problem.getCustomHoldIndexes();
+    String test = jsonEncode(flippedIndexHolds);
     var flippedHolds = flippedIndexHolds.map((e) => Utils.convert1DTo2D(e, 11)).toList();
     flippedHolds = flippedHolds.map((e) => Utils.flipOverY(e, 17)).toList();
     holds = flippedHolds.map((e) => Utils.convert2DTo1D(e, 11)).toList();
