@@ -10,6 +10,8 @@ import 'package:awesome_board/widgets/custom_dialog.dart';
 import 'package:awesome_board/widgets/sick_button.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io' as io;
 
 class ProblemScreen extends StatefulWidget {
   final Problem problem;
@@ -43,14 +45,23 @@ class _ProblemScreenState extends State<ProblemScreen> {
   @override
   void initState() {
     liked = widget.problem.isLiked();
-    customBoard = widget.problem.holdsSetup == 999;
-    imgPath = customBoard ? "./assets/images/custom_moonboard.png" : "./assets/images/A_2016-B_2016-OS_2016_highRes.png";
+    customBoard = true;
     super.initState();
     _bleSubscription = _bleService.streamInformation.listen((event) {
       if (event == BleInformationType.deviceReady) {
         setState(() {});
       }
     });
+    checkImage();
+  }
+
+  void checkImage() async {
+    var dir = await getApplicationDocumentsDirectory();
+    var file = io.File(dir.path + "moon.png");
+    if (await file.exists()) {
+      imgPath = file.path;
+    }
+    setState(() {});
   }
 
   void sendToMoon() async {
@@ -185,6 +196,7 @@ class _ProblemScreenState extends State<ProblemScreen> {
                               customBoard = !customBoard;
                               imgPath = customBoard ? "./assets/images/custom_moonboard.png" : "./assets/images/A_2016-B_2016-OS_2016_highRes.png";
                             });
+                            if (customBoard) checkImage();
                           },
                         ),
                         SickButton(child: Icon(Icons.send, color: _theme.accentColor), onPress: sendToMoon),

@@ -1,7 +1,10 @@
 import 'dart:math';
 
+import 'package:awesome_board/models/problem.dart';
+import 'package:awesome_board/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io' as io;
 
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/models/utils.dart';
@@ -18,6 +21,8 @@ class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
   final double holdsVertical = 18;
   String message = "";
   String imgPath = "./assets/images/custom_moonboard.png";
+  bool showNumbers = false;
+  bool onlyNonPlaced = false;
 
   Map<int, int> holds;
   int _max = 0;
@@ -26,13 +31,31 @@ class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
   @override
   initState() {
     super.initState();
+    refreshSelected();
+    checkImage();
+  }
 
+  void refreshSelected() {
     var mapp = Utils.holdHeatMap(Utils.fetchProblemUseSettings(""));
+    if (onlyNonPlaced) {
+      var holdscustom = Problem.getCustomHoldIndexes();
+      mapp.removeWhere((key, value) => holdscustom.contains(key));
+    }
     var flippedHolds = mapp.map((k, v) => MapEntry(Utils.convert1DTo2D(k, 11), v));
     flippedHolds = flippedHolds.map((k, v) => MapEntry(Utils.flipOverY(k, 17), v));
     holds = flippedHolds.map((k, v) => MapEntry(Utils.convert2DTo1D(k, 11), v));
     _max = holds.values.reduce(max);
     _min = holds.values.reduce(min);
+    setState(() {});
+  }
+
+  void checkImage() async {
+    var dir = await getApplicationDocumentsDirectory();
+    var file = io.File(dir.path + "moon.png");
+    if (await file.exists()) {
+      imgPath = file.path;
+    }
+    setState(() {});
   }
 
   cancel() {
@@ -44,58 +67,97 @@ class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
     double screenW = MediaQuery.of(context).size.width - (20 + 16);
     double imgH = screenW * 1.54;
     return Container(
-      child: Column(
-        children: [
-          Container(
-            margin: EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                SickButton(
-                  child: Icon(
-                    Icons.fullscreen_exit,
-                    color: _theme.foreground,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              margin: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: CustomCard(
+                      headChild: Icon(
+                        Icons.format_list_numbered_sharp,
+                        color: _theme.foreground,
+                      ),
+                      padding: 3,
+                      child: Switch(
+                          activeColor: _theme.accentColor,
+                          value: showNumbers,
+                          onChanged: (val) {
+                            setState(() {
+                              showNumbers = val;
+                            });
+                          }),
+                    ),
                   ),
-                  onPress: cancel,
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-              padding: EdgeInsets.only(
-                top: (imgH / 16.8),
-                left: (screenW / 9.5),
-                right: (screenW / 21.5),
-                bottom: (imgH / 26),
-              ),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(10),
-                image: DecorationImage(
-                  image: AssetImage(imgPath),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: ScrollPhysics(),
-                clipBehavior: Clip.none,
-                itemCount: (holdsHorizontal * holdsVertical).toInt(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: holdsHorizontal.toInt(),
-                ),
-                itemBuilder: (context, index) {
-                  int value = holds.keys.contains(index) ? holds[index] : -1;
-                  return GestureDetector(
-                    child: CustomPaint(painter: DrawCircle(_min, _max, value)),
-                  );
-                },
+                  Expanded(
+                    child: CustomCard(
+                      headChild: Icon(
+                        Icons.grid_off,
+                        color: _theme.foreground,
+                      ),
+                      padding: 3,
+                      child: Switch(
+                          activeColor: _theme.accentColor,
+                          value: onlyNonPlaced,
+                          onChanged: (val) {
+                            setState(() {
+                              onlyNonPlaced = val;
+                              refreshSelected();
+                            });
+                          }),
+                    ),
+                  ),
+                  Expanded(
+                    child: SickButton(
+                      child: Icon(
+                        Icons.fullscreen_exit,
+                        color: _theme.foreground,
+                      ),
+                      onPress: cancel,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+            Center(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+                padding: EdgeInsets.only(
+                  top: (imgH / 16.8),
+                  left: (screenW / 9.5),
+                  right: (screenW / 21.5),
+                  bottom: (imgH / 26),
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(10),
+                  image: DecorationImage(
+                    image: AssetImage(imgPath),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: ScrollPhysics(),
+                  clipBehavior: Clip.none,
+                  itemCount: (holdsHorizontal * holdsVertical).toInt(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: holdsHorizontal.toInt(),
+                  ),
+                  itemBuilder: (context, index) {
+                    int value = holds.keys.contains(index) ? holds[index] : -1;
+                    return GestureDetector(
+                      child: CustomPaint(painter: DrawCircle(_min, _max, value, showNumbers)),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -103,20 +165,38 @@ class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
 
 class DrawCircle extends CustomPainter {
   Paint _paint;
-
-  DrawCircle(int minimum, int maximum, int value) {
+  int _value;
+  bool _numbers;
+  DrawCircle(int minimum, int maximum, int value, bool numbers) {
     _paint = Paint()
       ..color = Colors.transparent
       ..style = PaintingStyle.fill;
     if (value != -1) {
       _paint.color = _heatMap(minimum, maximum, value).withOpacity(0.6);
     }
+    _value = value;
+    _numbers = numbers;
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     Rect rect = Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2);
     canvas.drawRect(rect, _paint);
+    if (_value != -1 && _numbers) {
+      TextSpan span = new TextSpan(
+        style: new TextStyle(color: Colors.white, fontSize: size.width / 3, shadows: [
+          Shadow(blurRadius: 10, color: Colors.black),
+        ]),
+        text: _value.toString(),
+      );
+      TextPainter tp = new TextPainter(
+        text: span,
+        textAlign: TextAlign.left,
+        textDirection: TextDirection.ltr,
+      );
+      tp.layout();
+      tp.paint(canvas, new Offset(1, 1));
+    }
   }
 
   @override

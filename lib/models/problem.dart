@@ -7,7 +7,6 @@ import 'package:awesome_board/models/utils.dart';
 
 import 'package:awesome_board/widgets/problem_widget.dart';
 import 'package:uuid/uuid.dart';
-import 'package:collection/collection.dart';
 part 'problem.g.dart';
 
 enum HoldType {

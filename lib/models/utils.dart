@@ -80,7 +80,6 @@ class Utils {
           map[i] = 1;
       }
     }
-    int toll = 1;
     return map;
   }
 

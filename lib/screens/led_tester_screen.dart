@@ -1,17 +1,13 @@
 import 'dart:async';
 
 import 'package:awesome_board/models/custom_theme.dart';
-import 'package:awesome_board/models/problem.dart';
-import 'package:awesome_board/models/utils.dart';
 import 'package:awesome_board/services/ble_service.dart';
 import 'package:awesome_board/widgets/custom_app_bar.dart';
 import 'package:awesome_board/widgets/custom_card.dart';
-import 'package:awesome_board/widgets/custom_dialog.dart';
 import 'package:awesome_board/widgets/esp32_mode.dart';
 import 'package:awesome_board/widgets/gradient_icon.dart';
 import 'package:awesome_board/widgets/sick_button.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 
 class LedTesterScreen extends StatefulWidget {
   const LedTesterScreen({

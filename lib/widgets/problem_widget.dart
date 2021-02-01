@@ -2,7 +2,6 @@ import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/screens/problem_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:awesome_board/models/problem.dart';
-import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 
 class ProblemWidget extends StatefulWidget {

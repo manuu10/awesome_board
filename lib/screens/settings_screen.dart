@@ -5,6 +5,7 @@ import 'package:awesome_board/screens/led_tester_screen.dart';
 import 'package:awesome_board/screens/settings_heatmap_screen.dart';
 import 'package:awesome_board/screens/settings_specify_custom_board_holds_screen.dart';
 import 'package:awesome_board/screens/settings_specify_holds_screen.dart';
+import 'package:awesome_board/services/httpService.dart';
 import 'package:awesome_board/services/json_service.dart';
 import 'package:awesome_board/services/sqlite_service.dart';
 import 'package:awesome_board/widgets/custom_app_bar.dart';
@@ -527,6 +528,74 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       onPress: refreshJsonFileProblems,
                       headChild: Icon(Icons.refresh, color: _theme.foreground),
+                    ),
+                    CustomCard(
+                      child: Text(
+                        "Check for Update",
+                        style: TextStyle(color: _theme.foreground, fontSize: 18),
+                      ),
+                      onPress: () async {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              backgroundColor: _theme.background,
+                              title: Text("Update", style: TextStyle(color: _theme.foreground, fontSize: 18)),
+                              content: FutureBuilder<bool>(
+                                future: HttpService.updateAvailable(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    String text = snapshot.data ? "Update available" : "No update available";
+                                    return Row(
+                                      children: [
+                                        !snapshot.data
+                                            ? Icon(
+                                                Icons.check_circle,
+                                                color: Colors.green,
+                                              )
+                                            : Icon(
+                                                Icons.warning,
+                                                color: Colors.orange,
+                                              ),
+                                        Text(text, style: TextStyle(color: _theme.foreground, fontSize: 18)),
+                                      ],
+                                    );
+                                  }
+                                  return LinearProgressIndicator();
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      headChild: Icon(Icons.refresh, color: _theme.foreground),
+                    ),
+                    CustomCard(
+                      child: Text(
+                        "Get new image",
+                        style: TextStyle(color: _theme.foreground, fontSize: 18),
+                      ),
+                      onPress: () async {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              backgroundColor: _theme.background,
+                              content: FutureBuilder<bool>(
+                                future: HttpService.refreshWallImage(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    String text = snapshot.data ? "Loaded" : "Error loading";
+                                    return Text(text, style: TextStyle(color: _theme.foreground, fontSize: 18));
+                                  }
+                                  return LinearProgressIndicator();
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      headChild: Icon(Icons.image, color: Colors.blueGrey),
                     ),
                     CustomCard(
                       child: Text(

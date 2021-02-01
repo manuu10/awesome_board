@@ -19,12 +19,6 @@ class _Esp32ModeState extends State<Esp32Mode> {
   }
 
   @override
-  void dispose() async {
-    // TODO: implement dispose
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return StreamBuilder<String>(
       stream: this.widget.esp32Read,

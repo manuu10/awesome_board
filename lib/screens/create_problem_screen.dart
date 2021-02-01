@@ -14,6 +14,8 @@ import 'package:awesome_board/widgets/save_dialog.dart';
 import 'package:awesome_board/widgets/sick_button.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io' as io;
 
 class CreateProblemScreen extends StatefulWidget {
   @override
@@ -68,6 +70,16 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
         setState(() {});
       }
     });
+    checkImage();
+  }
+
+  void checkImage() async {
+    var dir = await getApplicationDocumentsDirectory();
+    var file = io.File(dir.path + "moon.png");
+    if (await file.exists()) {
+      imgPath = file.path;
+    }
+    setState(() {});
   }
 
   void save(String author, String name, int grade) async {
@@ -266,6 +278,7 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
                               customBoard = !customBoard;
                               imgPath = customBoard ? "./assets/images/custom_moonboard.png" : "./assets/images/A_2016-B_2016-OS_2016_highRes.png";
                             });
+                            if (customBoard) checkImage();
                           },
                         ),
                       ],

@@ -6,9 +6,7 @@ import 'package:awesome_board/models/utils.dart';
 import 'package:awesome_board/screens/problem_screen.dart';
 import 'package:awesome_board/widgets/custom_app_bar.dart';
 import 'package:awesome_board/widgets/custom_card.dart';
-import 'package:awesome_board/widgets/problem_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 
 class OverviewScreen extends StatefulWidget {
   @override
