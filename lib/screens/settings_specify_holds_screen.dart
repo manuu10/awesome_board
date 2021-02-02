@@ -22,10 +22,12 @@ class _SettingsSpecifyHoldsScreenState extends State<SettingsSpecifyHoldsScreen>
   String imgPath = "./assets/images/custom_moonboard.png";
   List<int> holds = [];
   Box _box;
+  ImageProvider brdImage;
 
   @override
   initState() {
     super.initState();
+    brdImage = AssetImage(imgPath);
     _box = Hive.box("settings");
     List<int> flippedIndexHolds = _box.get("specifiedHolds") ?? [];
     var flippedHolds = flippedIndexHolds.map((e) => Utils.convert1DTo2D(e, 11)).toList();
@@ -37,12 +39,13 @@ class _SettingsSpecifyHoldsScreenState extends State<SettingsSpecifyHoldsScreen>
 
   void checkImage() async {
     var dir = await getApplicationDocumentsDirectory();
-    var file = io.File(dir.path + "moon.png");
+    var file = io.File(dir.path + "/moon.png");
     if (await file.exists()) {
-      imgPath = file.path;
+      brdImage = FileImage(file);
     } else {
-      imgPath = "./assets/images/custom_moonboard.png";
+      brdImage = AssetImage(imgPath);
     }
+
     setState(() {});
   }
 
@@ -119,7 +122,7 @@ class _SettingsSpecifyHoldsScreenState extends State<SettingsSpecifyHoldsScreen>
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(10),
                   image: DecorationImage(
-                    image: AssetImage(imgPath),
+                    image: brdImage,
                     fit: BoxFit.cover,
                   ),
                 ),

@@ -34,9 +34,9 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
   StreamSubscription _liveRandomFinishSub;
   StreamSubscription _bleSubscription;
   BleService _bleService = BleService();
-
   bool customBoard = true;
   String imgPath = "./assets/images/custom_moonboard.png";
+  ImageProvider brdImage;
 
   @override
   void dispose() async {
@@ -70,14 +70,21 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
         setState(() {});
       }
     });
+    brdImage = AssetImage("./assets/images/custom_moonboard.png");
     checkImage();
   }
 
   void checkImage() async {
     var dir = await getApplicationDocumentsDirectory();
-    var file = io.File(dir.path + "moon.png");
-    if (await file.exists()) {
-      imgPath = file.path;
+    var file = io.File(dir.path + "/moon.png");
+    if (customBoard) {
+      if (await file.exists()) {
+        brdImage = FileImage(file);
+      } else {
+        brdImage = AssetImage("./assets/images/custom_moonboard.png");
+      }
+    } else {
+      brdImage = AssetImage("./assets/images/A_2016-B_2016-OS_2016_highRes.png");
     }
     setState(() {});
   }
@@ -274,11 +281,8 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
                         SickButton(
                           child: Icon(Icons.swap_horiz, color: !customBoard ? Colors.yellow : Colors.blue),
                           onPress: () {
-                            setState(() {
-                              customBoard = !customBoard;
-                              imgPath = customBoard ? "./assets/images/custom_moonboard.png" : "./assets/images/A_2016-B_2016-OS_2016_highRes.png";
-                            });
-                            if (customBoard) checkImage();
+                            customBoard = !customBoard;
+                            checkImage();
                           },
                         ),
                       ],
@@ -341,7 +345,7 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
                           color: Colors.black,
                           borderRadius: BorderRadius.circular(10),
                           image: DecorationImage(
-                            image: AssetImage(imgPath),
+                            image: brdImage,
                             fit: BoxFit.cover,
                           ),
                         ),

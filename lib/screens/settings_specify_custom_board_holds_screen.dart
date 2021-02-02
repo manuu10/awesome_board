@@ -23,6 +23,8 @@ class _SettingsSpecifyCustomHoldsScreenState extends State<SettingsSpecifyCustom
 
   bool customBoard = true;
 
+  ImageProvider brdImage;
+
   @override
   initState() {
     super.initState();
@@ -32,14 +34,18 @@ class _SettingsSpecifyCustomHoldsScreenState extends State<SettingsSpecifyCustom
     flippedHolds = flippedHolds.map((e) => Utils.flipOverY(e, 17)).toList();
     holds = flippedHolds.map((e) => Utils.convert2DTo1D(e, 11)).toList();
     checkImage();
+    brdImage = AssetImage(imgPath);
   }
 
   void checkImage() async {
     var dir = await getApplicationDocumentsDirectory();
-    var file = io.File(dir.path + "moon.png");
+    var file = io.File(dir.path + "/moon.png");
     if (await file.exists()) {
-      imgPath = file.path;
+      brdImage = FileImage(file);
+    } else {
+      brdImage = AssetImage(imgPath);
     }
+
     setState(() {});
   }
 
@@ -127,7 +133,7 @@ class _SettingsSpecifyCustomHoldsScreenState extends State<SettingsSpecifyCustom
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(10),
                   image: DecorationImage(
-                    image: AssetImage(imgPath),
+                    image: brdImage,
                     fit: BoxFit.cover,
                   ),
                 ),

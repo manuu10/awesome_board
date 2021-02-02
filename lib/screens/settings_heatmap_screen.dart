@@ -23,6 +23,7 @@ class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
   String imgPath = "./assets/images/custom_moonboard.png";
   bool showNumbers = false;
   bool onlyNonPlaced = false;
+  ImageProvider brdImage;
 
   Map<int, int> holds;
   int _max = 0;
@@ -31,6 +32,7 @@ class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
   @override
   initState() {
     super.initState();
+    brdImage = AssetImage(imgPath);
     refreshSelected();
     checkImage();
   }
@@ -51,10 +53,13 @@ class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
 
   void checkImage() async {
     var dir = await getApplicationDocumentsDirectory();
-    var file = io.File(dir.path + "moon.png");
+    var file = io.File(dir.path + "/moon.png");
     if (await file.exists()) {
-      imgPath = file.path;
+      brdImage = FileImage(file);
+    } else {
+      brdImage = AssetImage(imgPath);
     }
+
     setState(() {});
   }
 
@@ -135,7 +140,7 @@ class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(10),
                   image: DecorationImage(
-                    image: AssetImage(imgPath),
+                    image: brdImage,
                     fit: BoxFit.cover,
                   ),
                 ),

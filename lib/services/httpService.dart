@@ -18,7 +18,7 @@ class HttpService {
     var response = await http.get(_host + "/install/climbingboard/custom_moonboard.png");
     if (response.statusCode >= 400) return false;
     var dir = await getApplicationDocumentsDirectory();
-    var file = io.File(dir.path + "moon.png");
+    var file = io.File(dir.path + "/moon.png");
     await file.writeAsBytes(response.bodyBytes);
     return true;
   }
