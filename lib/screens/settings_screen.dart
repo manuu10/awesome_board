@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/models/problem.dart';
 import 'package:awesome_board/models/utils.dart';
@@ -14,6 +16,7 @@ import 'package:awesome_board/widgets/gradient_icon.dart';
 import 'package:awesome_board/widgets/sick_button.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -530,6 +533,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       headChild: Icon(Icons.refresh, color: _theme.foreground),
                     ),
                     CustomCard(
+                      headChild: Icon(Icons.update, color: _theme.foreground),
                       child: Text(
                         "Check for Update",
                         style: TextStyle(color: _theme.foreground, fontSize: 18),
@@ -546,18 +550,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
                                     String text = snapshot.data ? "Update available" : "No update available";
-                                    return Row(
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        !snapshot.data
-                                            ? Icon(
-                                                Icons.check_circle,
-                                                color: Colors.green,
+                                        Row(
+                                          children: [
+                                            !snapshot.data
+                                                ? Icon(
+                                                    Icons.check_circle,
+                                                    color: Colors.green,
+                                                  )
+                                                : Icon(
+                                                    Icons.warning,
+                                                    color: Colors.orange,
+                                                  ),
+                                            Text(text, style: TextStyle(color: _theme.foreground, fontSize: 18)),
+                                          ],
+                                        ),
+                                        SizedBox(height: 20),
+                                        snapshot.data
+                                            ? RaisedButton(
+                                                color: _theme.secondBackground,
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.download_rounded,
+                                                      color: _theme.foreground,
+                                                    ),
+                                                    SizedBox(width: 10),
+                                                    Text("Download", style: TextStyle(color: _theme.foreground)),
+                                                  ],
+                                                ),
+                                                onPressed: () async {
+                                                  const url = "https://xn--blleblle-n4ae.de/install/climbingboard";
+                                                  if (await canLaunch(url)) {
+                                                    await launch(url);
+                                                  }
+                                                },
                                               )
-                                            : Icon(
-                                                Icons.warning,
-                                                color: Colors.orange,
-                                              ),
-                                        Text(text, style: TextStyle(color: _theme.foreground, fontSize: 18)),
+                                            : SizedBox(),
                                       ],
                                     );
                                   }
@@ -568,9 +599,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           },
                         );
                       },
-                      headChild: Icon(Icons.refresh, color: _theme.foreground),
                     ),
                     CustomCard(
+                      headChild: Icon(Icons.image, color: _theme.operatorsColor),
                       child: Text(
                         "Get new image",
                         style: TextStyle(color: _theme.foreground, fontSize: 18),
@@ -581,12 +612,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           builder: (context) {
                             return AlertDialog(
                               backgroundColor: _theme.background,
-                              content: FutureBuilder<bool>(
+                              content: FutureBuilder<String>(
                                 future: HttpService.refreshWallImage(),
                                 builder: (context, snapshot) {
                                   if (snapshot.hasData) {
-                                    String text = snapshot.data ? "Loaded" : "Error loading";
-                                    return Text(text, style: TextStyle(color: _theme.foreground, fontSize: 18));
+                                    String text = snapshot.data != "error" ? "Loaded" : "Error loading";
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(text, style: TextStyle(color: _theme.foreground, fontSize: 18)),
+                                        SizedBox(height: 20),
+                                        snapshot.data != "error"
+                                            ? Image.file(
+                                                File(snapshot.data),
+                                                scale: 0.5,
+                                              )
+                                            : SizedBox(),
+                                      ],
+                                    );
                                   }
                                   return LinearProgressIndicator();
                                 },
@@ -595,7 +638,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           },
                         );
                       },
-                      headChild: Icon(Icons.image, color: Colors.blueGrey),
                     ),
                     CustomCard(
                       child: Text(
@@ -603,7 +645,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         style: TextStyle(color: _theme.foreground, fontSize: 18),
                       ),
                       onPress: ledTesting,
-                      headChild: Icon(Icons.lightbulb, color: Colors.yellow),
+                      headChild: Icon(Icons.lightbulb, color: _theme.stringsColor),
                     ),
                   ],
                 ),

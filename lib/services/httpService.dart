@@ -14,12 +14,12 @@ class HttpService {
     return false;
   }
 
-  static Future<bool> refreshWallImage() async {
+  static Future<String> refreshWallImage() async {
     var response = await http.get(_host + "/install/climbingboard/custom_moonboard.png");
-    if (response.statusCode >= 400) return false;
+    if (response.statusCode >= 400) return "error";
     var dir = await getApplicationDocumentsDirectory();
     var file = io.File(dir.path + "/moon.png");
     await file.writeAsBytes(response.bodyBytes);
-    return true;
+    return file.path;
   }
 }
