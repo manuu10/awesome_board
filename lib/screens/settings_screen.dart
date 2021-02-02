@@ -603,7 +603,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     CustomCard(
                       headChild: Icon(Icons.image, color: _theme.operatorsColor),
                       child: Text(
-                        "Get new image",
+                        "Get new board Layout",
                         style: TextStyle(color: _theme.foreground, fontSize: 18),
                       ),
                       onPress: () async {
