@@ -126,7 +126,7 @@ class BleService {
       _serviceUUID,
       _characteristicsWriteUUID,
       val,
-      false,
+      true,
     );
   }
 }
