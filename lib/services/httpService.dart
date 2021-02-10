@@ -4,7 +4,7 @@ import 'dart:io' as io;
 
 class HttpService {
   static final String _host = "https://xn--blleblle-n4ae.de";
-  static int _versionNumber = 1;
+  static int _versionNumber = 2;
 
   static Future<bool> updateAvailable() async {
     http.Response response = await http.get(_host + "/install/climbingboard/version.txt");
