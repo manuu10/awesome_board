@@ -82,10 +82,22 @@ class Problem {
     await box.delete(this.strId);
   }
 
-  Widget getWidget() {
+  Widget getWidget(List<Problem> problems) {
     return ProblemWidget(
       problem: this,
+      problems: problems,
     );
+  }
+
+  List<Hold> mirrorHolds() {
+    return getHolds()
+        .map(
+          (e) => Hold(
+            holdType: e.holdType,
+            location: Point<int>(10 - e.location.x, e.location.y),
+          ),
+        )
+        .toList();
   }
 
   //Converting the json String for the Holds to a usable List of objects
@@ -205,6 +217,16 @@ class Problem {
     var tagsJson = jsonDecode(holds);
     List<int> lHolds = List.from(tagsJson);
     for (int i = 0; i < lHolds.length - 1; i += 2) {
+      if (!availableHolds.contains(lHolds[i])) return false;
+    }
+    return true;
+  }
+
+  bool mirrorSuitedForCustomBoard() {
+    var availableHolds = getCustomHoldIndexes();
+    var flipped = mirrorHolds().map((e) => Utils.flipOverY(e.location, 17)).toList();
+    List<int> lHolds = flipped.map((e) => Utils.convert2DTo1D(e, 11)).toList();
+    for (int i = 0; i < lHolds.length; i++) {
       if (!availableHolds.contains(lHolds[i])) return false;
     }
     return true;

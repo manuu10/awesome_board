@@ -21,20 +21,18 @@ class Utils {
 
   static List<Problem> fetchProblemUseSettings(String search) {
     var _box = Hive.box("settings");
-    bool custom = _box.get("showCustomProblems");
-    bool database = _box.get("showDatabaseProblems");
-    bool jsonFile = _box.get("showJsonFileProblems");
-    if (custom == null) custom = false;
-    if (database == null) database = false;
-    if (jsonFile == null) jsonFile = false;
+    bool custom = _box.get("showCustomProblems") ?? false;
+    bool database = _box.get("showDatabaseProblems") ?? false;
+    bool jsonFile = _box.get("showJsonFileProblems") ?? false;
     return fetchProblems(search: search, custom: custom, database: database, jsonFile: jsonFile);
   }
 
-  static List<Problem> fetchProblems({bool custom = false, bool database = false, bool jsonFile = false, String search = ""}) {
+  static List<Problem> fetchProblems({bool custom = false, bool mirror = false, bool database = false, bool jsonFile = false, String search = ""}) {
     List<Problem> problems = [];
     var box = Hive.box("settings");
 
     bool onlyCustomHolds = box.get("onlyCustomHolds") ?? false;
+    bool mirrorCustomHolds = box.get("mirrorCustomHolds") ?? false;
     bool containsSpecifiedHolds = box.get("containsSpecifiedHolds") ?? false;
     bool onlyFavorites = box.get("onlyFavorites") ?? false;
     List<int> grades = box.get("grades") ?? [];
@@ -60,8 +58,15 @@ class Utils {
     if (grades.isNotEmpty) {
       problems = problems.where((e) => grades.contains(e.grade)).toList();
     }
-    if (onlyCustomHolds) {
-      problems = problems.where((e) => e.suitedForCustomBoard()).toList();
+    if (onlyCustomHolds || mirrorCustomHolds) {
+      if (onlyCustomHolds && mirrorCustomHolds) {
+        problems = problems.where((e) => e.suitedForCustomBoard() || e.mirrorSuitedForCustomBoard()).toList();
+      } else {
+        if (onlyCustomHolds)
+          problems = problems.where((e) => e.suitedForCustomBoard()).toList();
+        else
+          problems = problems.where((e) => e.mirrorSuitedForCustomBoard()).toList();
+      }
     }
     if (containsSpecifiedHolds) {
       problems = problems.where((e) => e.containsHolds(selectedHolds)).toList();

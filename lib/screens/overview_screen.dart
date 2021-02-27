@@ -42,6 +42,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
           backgroundColor: _theme.background,
           child: ProblemScreen(
             problem: problems[Random().nextInt(problems.length)],
+            problems: problems,
           ),
         );
       },
@@ -109,7 +110,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                       child: ListView(
                         controller: scrCtrl,
                         padding: EdgeInsets.only(right: 10),
-                        children: problems.map((e) => e.getWidget()).toList(),
+                        children: problems.map((e) => e.getWidget(problems)).toList(),
                       ),
                     ),
                   ),

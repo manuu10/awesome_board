@@ -35,6 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String themeName = "";
   bool showCustomProblems;
   bool onlyCustomHolds;
+  bool mirrorCustomHolds;
   bool showDatabaseProblems;
   bool showJsonFileProblems;
   bool containsSpecifiedHolds;
@@ -49,6 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDatabaseProblems = _box.get("showDatabaseProblems") ?? false;
     showJsonFileProblems = _box.get("showJsonFileProblems") ?? false;
     onlyCustomHolds = _box.get("onlyCustomHolds") ?? false;
+    mirrorCustomHolds = _box.get("mirrorCustomHolds") ?? false;
     containsSpecifiedHolds = _box.get("containsSpecifiedHolds") ?? false;
     onlyFavorites = _box.get("onlyFavorites") ?? false;
     themeName = _box.get("theme");
@@ -265,6 +267,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ),
                                   ),
                                 ],
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Switch(
+                                activeColor: _theme.accentColor,
+                                value: mirrorCustomHolds,
+                                onChanged: (value) {
+                                  setState(() {
+                                    mirrorCustomHolds = value;
+                                    Hive.box("settings").put("mirrorCustomHolds", mirrorCustomHolds);
+                                  });
+                                },
+                              ),
+                              Text(
+                                "effirG enegie",
+                                style: TextStyle(
+                                  color: mirrorCustomHolds ? _theme.accentColor : _theme.foreground,
+                                  fontSize: 18,
+                                ),
                               ),
                             ],
                           ),

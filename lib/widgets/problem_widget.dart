@@ -3,14 +3,17 @@ import 'package:awesome_board/screens/problem_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:awesome_board/models/problem.dart';
 import 'package:intl/intl.dart';
+import 'dart:math' as math;
 
 class ProblemWidget extends StatefulWidget {
   @override
   _ProblemWidgetState createState() => _ProblemWidgetState();
   final Problem problem;
+  final List<Problem> problems;
   const ProblemWidget({
     Key key,
     this.problem,
+    this.problems,
   }) : super(key: key);
 }
 
@@ -27,17 +30,11 @@ class _ProblemWidgetState extends State<ProblemWidget> {
           backgroundColor: theme.background,
           child: ProblemScreen(
             problem: this.widget.problem,
+            problems: this.widget.problems,
           ),
         );
       },
     );
-    /* Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ProblemScreen(
-          problem: this.widget.problem,
-        ),
-      ),
-    ); */
   }
 
   @override
@@ -115,6 +112,16 @@ class _ProblemWidgetState extends State<ProblemWidget> {
                         ? Icon(
                             Icons.favorite,
                             color: Colors.pink,
+                          )
+                        : SizedBox(),
+                    problem.mirrorSuitedForCustomBoard()
+                        ? Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.rotationY(math.pi),
+                            child: Icon(
+                              Icons.check_circle_outline,
+                              color: Colors.yellowAccent,
+                            ),
                           )
                         : SizedBox(),
                     problem.suitedForCustomBoard()

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/models/problem.dart';
@@ -12,13 +13,16 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' as io;
+import 'dart:math' as math;
 
 class ProblemScreen extends StatefulWidget {
   final Problem problem;
+  final List<Problem> problems;
 
   const ProblemScreen({
     Key key,
     this.problem,
+    this.problems,
   }) : super(key: key);
   @override
   _ProblemScreenState createState() => _ProblemScreenState();
@@ -28,10 +32,12 @@ class _ProblemScreenState extends State<ProblemScreen> {
   final CustomTheme _theme = CustomTheme.getThemeFromStorage();
   final double holdsHorizontal = 11;
   final double holdsVertical = 18;
+  Problem problem;
   String message = "";
   String imgPath = "";
   bool customBoard;
   bool liked;
+  bool mirror;
   final BleService _bleService = BleService();
   StreamSubscription<BleInformationType> _bleSubscription;
 
@@ -46,8 +52,10 @@ class _ProblemScreenState extends State<ProblemScreen> {
 
   @override
   void initState() {
-    liked = widget.problem.isLiked();
+    problem = this.widget.problem;
+    liked = problem.isLiked();
     customBoard = true;
+    mirror = false;
     super.initState();
     _bleSubscription = _bleService.streamInformation.listen((event) {
       if (event == BleInformationType.deviceReady) {
@@ -107,11 +115,16 @@ class _ProblemScreenState extends State<ProblemScreen> {
     setState(() {});
   }
 
+  void nextProblem() {
+    setState(() {
+      problem = this.widget.problems[Random().nextInt(this.widget.problems.length)];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenW = MediaQuery.of(context).size.width - (20 + 16);
     double imgH = screenW * 1.54;
-    Problem problem = this.widget.problem;
     return Container(
       child: Column(
         children: [
@@ -175,13 +188,29 @@ class _ProblemScreenState extends State<ProblemScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Text(
-                            problem.getGradeString(),
-                            style: TextStyle(color: _theme.linksColor),
+                          Expanded(
+                            child: Text(
+                              problem.getGradeString(),
+                              style: TextStyle(color: _theme.linksColor),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                          Text(
-                            problem.name,
-                            style: TextStyle(color: _theme.accentColor),
+                          problem.mirrorSuitedForCustomBoard()
+                              ? Transform(
+                                  alignment: Alignment.topCenter,
+                                  transform: Matrix4.rotationY(math.pi),
+                                  child: Icon(
+                                    Icons.check_circle_outline,
+                                    color: Colors.yellowAccent,
+                                  ),
+                                )
+                              : SizedBox(),
+                          Expanded(
+                            child: Text(
+                              problem.name,
+                              style: TextStyle(color: _theme.accentColor),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ],
                       ),
@@ -209,52 +238,83 @@ class _ProblemScreenState extends State<ProblemScreen> {
                       ],
                     ),
                     Center(
-                      child: Container(
-                        margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-                        padding: EdgeInsets.only(
-                          top: (imgH / 16.8),
-                          left: (screenW / 9.5),
-                          right: (screenW / 21.5),
-                          bottom: (imgH / 26),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(10),
-                          image: DecorationImage(
-                            image: brdImage,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: ScrollPhysics(),
-                          clipBehavior: Clip.none,
-                          itemCount: (holdsHorizontal * holdsVertical).toInt(),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: holdsHorizontal.toInt(),
-                          ),
-                          itemBuilder: (context, index) {
-                            List<Hold> holds = problem.getHolds();
-                            int hIn = holds.indexWhere((e) => Utils.convert2DTo1D(e.location, holdsHorizontal.toInt()) == index);
-                            Color outlineColor = Colors.transparent;
+                      child: GestureDetector(
+                        onHorizontalDragEnd: (details) {
+                          if (details.primaryVelocity > 0) {
+                            setState(() {
+                              mirror = !mirror;
+                            });
+                          } else if (details.primaryVelocity < 0) {
+                            nextProblem();
+                          }
+                        },
+                        child: Stack(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+                              padding: EdgeInsets.only(
+                                top: (imgH / 16.8),
+                                left: (screenW / 9.5),
+                                right: (screenW / 21.5),
+                                bottom: (imgH / 26),
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(10),
+                                image: DecorationImage(
+                                  image: brdImage,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              child: GridView.builder(
+                                shrinkWrap: true,
+                                physics: ScrollPhysics(),
+                                clipBehavior: Clip.none,
+                                itemCount: (holdsHorizontal * holdsVertical).toInt(),
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: holdsHorizontal.toInt(),
+                                ),
+                                itemBuilder: (context, index) {
+                                  List<Hold> holds = mirror ? problem.mirrorHolds() : problem.getHolds();
+                                  int hIn = holds.indexWhere((e) => Utils.convert2DTo1D(e.location, holdsHorizontal.toInt()) == index);
+                                  Color outlineColor = Colors.transparent;
 
-                            if (hIn != -1) {
-                              Hold h = holds[hIn];
-                              switch (h.holdType) {
-                                case HoldType.finishHold:
-                                  outlineColor = Colors.redAccent;
-                                  break;
-                                case HoldType.startHold:
-                                  outlineColor = Colors.greenAccent;
-                                  break;
-                                case HoldType.normalHold:
-                                  outlineColor = Colors.blueAccent;
-                                  break;
-                              }
-                            }
+                                  if (hIn != -1) {
+                                    Hold h = holds[hIn];
+                                    switch (h.holdType) {
+                                      case HoldType.finishHold:
+                                        outlineColor = Colors.redAccent;
+                                        break;
+                                      case HoldType.startHold:
+                                        outlineColor = Colors.greenAccent;
+                                        break;
+                                      case HoldType.normalHold:
+                                        outlineColor = Colors.blueAccent;
+                                        break;
+                                    }
+                                  }
 
-                            return CustomPaint(painter: DrawCircle(outlineColor));
-                          },
+                                  return CustomPaint(painter: DrawCircle(outlineColor));
+                                },
+                              ),
+                            ),
+                            Positioned(
+                              top: 8,
+                              child: mirror
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Transform(
+                                        alignment: Alignment.topCenter,
+                                        transform: Matrix4.rotationY(math.pi),
+                                        child: Icon(
+                                          Icons.check_circle_outline,
+                                          color: Colors.yellowAccent,
+                                        ),
+                                      ),
+                                    )
+                                  : SizedBox(),
+                            ),
+                          ],
                         ),
                       ),
                     ),
