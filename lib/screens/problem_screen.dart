@@ -35,11 +35,13 @@ class _ProblemScreenState extends State<ProblemScreen> {
   Problem problem;
   String message = "";
   String imgPath = "";
+  int currentHistoryIndex = 0;
   bool customBoard;
   bool liked;
   bool mirror;
   final BleService _bleService = BleService();
   StreamSubscription<BleInformationType> _bleSubscription;
+  List<Problem> history = [];
 
   ImageProvider brdImage;
 
@@ -56,6 +58,7 @@ class _ProblemScreenState extends State<ProblemScreen> {
     liked = problem.isLiked();
     customBoard = true;
     mirror = false;
+    history.add(problem);
     super.initState();
     _bleSubscription = _bleService.streamInformation.listen((event) {
       if (event == BleInformationType.deviceReady) {
@@ -117,7 +120,27 @@ class _ProblemScreenState extends State<ProblemScreen> {
 
   void nextProblem() {
     setState(() {
-      problem = this.widget.problems[Random().nextInt(this.widget.problems.length)];
+      if (currentHistoryIndex == history.length - 1) {
+        problem = this.widget.problems.removeAt(Random().nextInt(this.widget.problems.length));
+        history.add(problem);
+        currentHistoryIndex = history.length - 1;
+      } else {
+        currentHistoryIndex++;
+        problem = history[currentHistoryIndex];
+      }
+      liked = problem.isLiked();
+      mirror = false;
+    });
+  }
+
+  void previousProblem() {
+    setState(() {
+      if (currentHistoryIndex > 0) {
+        currentHistoryIndex--;
+        problem = history[currentHistoryIndex];
+        liked = problem.isLiked();
+        mirror = false;
+      }
     });
   }
 
@@ -188,6 +211,7 @@ class _ProblemScreenState extends State<ProblemScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
+                          Text((currentHistoryIndex + 1).toString() + "/" + history.length.toString(), style: TextStyle(color: _theme.foreground)),
                           Expanded(
                             child: Text(
                               problem.getGradeString(),
@@ -195,16 +219,26 @@ class _ProblemScreenState extends State<ProblemScreen> {
                               textAlign: TextAlign.center,
                             ),
                           ),
-                          problem.mirrorSuitedForCustomBoard()
-                              ? Transform(
-                                  alignment: Alignment.topCenter,
-                                  transform: Matrix4.rotationY(math.pi),
-                                  child: Icon(
-                                    Icons.check_circle_outline,
-                                    color: Colors.yellowAccent,
-                                  ),
-                                )
-                              : SizedBox(),
+                          Row(
+                            children: [
+                              problem.suitedForCustomBoard()
+                                  ? Icon(
+                                      Icons.check_circle_outline,
+                                      color: Colors.greenAccent,
+                                    )
+                                  : SizedBox(),
+                              problem.mirrorSuitedForCustomBoard()
+                                  ? Transform(
+                                      alignment: Alignment.topCenter,
+                                      transform: Matrix4.rotationY(math.pi),
+                                      child: Icon(
+                                        Icons.check_circle_outline,
+                                        color: Colors.yellowAccent,
+                                      ),
+                                    )
+                                  : SizedBox(),
+                            ],
+                          ),
                           Expanded(
                             child: Text(
                               problem.name,
@@ -239,11 +273,10 @@ class _ProblemScreenState extends State<ProblemScreen> {
                     ),
                     Center(
                       child: GestureDetector(
+                        onDoubleTap: () => setState(() => mirror = !mirror),
                         onHorizontalDragEnd: (details) {
                           if (details.primaryVelocity > 0) {
-                            setState(() {
-                              mirror = !mirror;
-                            });
+                            previousProblem();
                           } else if (details.primaryVelocity < 0) {
                             nextProblem();
                           }
