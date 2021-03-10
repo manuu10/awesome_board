@@ -94,7 +94,7 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
     Problem p = Problem(
       author: author,
       name: name,
-      holds: convertHoldsToString(),
+      holds: Utils.convertHoldsToString(holds),
       grade: grade,
       holdsSetup: holdSetup,
       dateTime: DateTime.now(),
@@ -123,28 +123,7 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
   }
 
   void sendToMoon() {
-    writeData(convertHoldsToString());
-  }
-
-  String convertHoldsToString() {
-    List<int> intHolds = [];
-    for (var e in holds) {
-      var ee = Hold(location: e.location, holdType: e.holdType);
-      ee.location = Utils.flipOverY(ee.location, holdsVertical.toInt() - 1);
-      intHolds.add(Utils.convert2DTo1D(ee.location, holdsHorizontal.toInt()));
-      switch (ee.holdType) {
-        case HoldType.finishHold:
-          intHolds.add(2);
-          break;
-        case HoldType.startHold:
-          intHolds.add(1);
-          break;
-        case HoldType.normalHold:
-          intHolds.add(0);
-          break;
-      }
-    }
-    return json.encode(intHolds);
+    writeData(Utils.convertHoldsToString(holds));
   }
 
   writeData(String data) {

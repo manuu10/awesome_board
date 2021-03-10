@@ -85,7 +85,7 @@ class _ProblemScreenState extends State<ProblemScreen> {
   }
 
   void sendToMoon() async {
-    _bleService.writeData(widget.problem.holds);
+    _bleService.writeData(mirror ? problem.mirrorHoldsIndexes() : problem.holds);
   }
 
   void deleteProblem() {
@@ -101,7 +101,7 @@ class _ProblemScreenState extends State<ProblemScreen> {
     ).then((value) async {
       if (value == "okay") {
         var box = Hive.box<Problem>("customProblems");
-        String id = widget.problem.strId;
+        String id = problem.strId;
         await box.delete(id);
       }
     });
@@ -109,10 +109,10 @@ class _ProblemScreenState extends State<ProblemScreen> {
 
   void toggleLiked() {
     if (liked) {
-      widget.problem.dislike();
+      problem.dislike();
       liked = false;
     } else {
-      widget.problem.like();
+      problem.like();
       liked = true;
     }
     setState(() {});
@@ -273,7 +273,15 @@ class _ProblemScreenState extends State<ProblemScreen> {
                     ),
                     Center(
                       child: GestureDetector(
-                        onDoubleTap: () => setState(() => mirror = !mirror),
+                        onDoubleTap: () {
+                          setState(() => mirror = !mirror);
+                          sendToMoon();
+                        },
+                        onVerticalDragEnd: (details) {
+                          if (details.primaryVelocity < 0) {
+                            sendToMoon();
+                          }
+                        },
                         onHorizontalDragEnd: (details) {
                           if (details.primaryVelocity > 0) {
                             previousProblem();

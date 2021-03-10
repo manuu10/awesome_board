@@ -100,6 +100,10 @@ class Problem {
         .toList();
   }
 
+  String mirrorHoldsIndexes() {
+    return Utils.convertHoldsToString(mirrorHolds());
+  }
+
   //Converting the json String for the Holds to a usable List of objects
   List<Hold> getHolds() {
     return convertHoldStringToList(this.holds);
@@ -113,7 +117,7 @@ class Problem {
   static List<Hold> convertHoldStringToList(String holds) {
     var tagsJson = jsonDecode(holds);
     List<int> lHolds = List.from(tagsJson);
-    List<Hold> list = List<Hold>();
+    List<Hold> list = <Hold>[];
     //Pattern is
     //[a,b,c,d,...]
     //where a and c would be the corresponding index for a hold and

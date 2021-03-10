@@ -1,9 +1,31 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:awesome_board/models/problem.dart';
 import 'package:hive/hive.dart';
 
 class Utils {
+  static String convertHoldsToString(List<Hold> holds) {
+    List<int> intHolds = [];
+    for (var e in holds) {
+      var ee = Hold(location: e.location, holdType: e.holdType);
+      ee.location = Utils.flipOverY(ee.location, 18 - 1);
+      intHolds.add(Utils.convert2DTo1D(ee.location, 11));
+      switch (ee.holdType) {
+        case HoldType.finishHold:
+          intHolds.add(2);
+          break;
+        case HoldType.startHold:
+          intHolds.add(1);
+          break;
+        case HoldType.normalHold:
+          intHolds.add(0);
+          break;
+      }
+    }
+    return json.encode(intHolds);
+  }
+
   static int convert2DTo1D(Point p, int length) {
     return (p.y * length) + p.x;
   }
