@@ -53,6 +53,7 @@ class _ProblemWidgetState extends State<ProblemWidget> {
         child: Stack(
           children: [
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -87,10 +88,12 @@ class _ProblemWidgetState extends State<ProblemWidget> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      problem.name,
-                      style: TextStyle(
-                        color: theme.functionsColor,
+                    Expanded(
+                      child: Text(
+                        problem.getSuffixName(),
+                        style: TextStyle(
+                          color: theme.functionsColor,
+                        ),
                       ),
                     ),
                     Text(
@@ -101,6 +104,14 @@ class _ProblemWidgetState extends State<ProblemWidget> {
                     ),
                   ],
                 ),
+                problem.getPrefixMethod() == null
+                    ? SizedBox()
+                    : Text(
+                        problem.getPrefixMethod(),
+                        style: TextStyle(
+                          color: theme.foreground,
+                        ),
+                      ),
               ],
             ),
             Positioned.fill(

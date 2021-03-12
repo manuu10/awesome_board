@@ -2,17 +2,29 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:awesome_board/models/utils.dart';
 
 import 'package:awesome_board/widgets/problem_widget.dart';
 import 'package:uuid/uuid.dart';
+
+import 'dart:math' as math;
 part 'problem.g.dart';
 
 enum HoldType {
   startHold,
   finishHold,
   normalHold,
+}
+
+enum ProblemMethod {
+  none,
+  feetFollowHands,
+  feetFollowHandsScrewOn,
+  footlessKickboard,
+  screwOnsOnly,
 }
 
 class Hold {
@@ -65,6 +77,65 @@ class Problem {
     if (this.strId == null) this.strId = Uuid().v4();
     if (this.holdsSetup == null) this.holdsSetup = 1;
     if (this.holdsType == null) this.holdsType = 4;
+  }
+
+  ProblemMethod getMethod() {
+    String prefix = getPrefixMethod();
+    if (prefix == null) return ProblemMethod.none;
+    prefix = prefix.trim().toLowerCase();
+    if (prefix.toLowerCase() == "feet follow hands") return ProblemMethod.feetFollowHands;
+    if (prefix.toLowerCase() == "feet follow hands + screw ons") return ProblemMethod.feetFollowHandsScrewOn;
+    if (prefix.toLowerCase() == "footless + kickboard") return ProblemMethod.footlessKickboard;
+    if (prefix.toLowerCase() == "screw ons only") return ProblemMethod.screwOnsOnly;
+
+    return ProblemMethod.none;
+  }
+
+  List<Widget> methodIcons(Color c) {
+    double size = 14;
+    double spacing = 5;
+    if (getMethod() == ProblemMethod.feetFollowHands || getMethod() == ProblemMethod.feetFollowHandsScrewOn) {
+      var list = <Widget>[
+        FaIcon(FontAwesomeIcons.shoePrints, color: Colors.yellow, size: size),
+        SizedBox(width: spacing),
+        FaIcon(FontAwesomeIcons.solidHandPaper, color: Color(0xffffdfc4), size: size),
+      ];
+      if (getMethod() == ProblemMethod.feetFollowHandsScrewOn)
+        list.addAll([
+          SizedBox(width: spacing * 2),
+          FaIcon(FontAwesomeIcons.plus, color: Colors.greenAccent, size: size - 2),
+          SizedBox(width: spacing * 1.5),
+          FaIcon(FontAwesomeIcons.stop, color: c, size: size),
+        ]);
+      return list;
+    }
+    if (getMethod() == ProblemMethod.footlessKickboard) {
+      return [
+        FaIcon(FontAwesomeIcons.times, color: Colors.redAccent, size: size),
+        SizedBox(width: spacing),
+        FaIcon(FontAwesomeIcons.shoePrints, color: c, size: size),
+        SizedBox(width: spacing * 2),
+        FaIcon(FontAwesomeIcons.plus, color: Colors.greenAccent, size: size - 2),
+        SizedBox(width: spacing * 1.5),
+        FaIcon(FontAwesomeIcons.gripHorizontal, color: c, size: size),
+      ];
+    }
+    if (getMethod() == ProblemMethod.screwOnsOnly) {
+      return [
+        FaIcon(FontAwesomeIcons.stop, color: c, size: size),
+      ];
+    }
+    return [];
+  }
+
+  String getPrefixMethod() {
+    if (!name.contains("~")) return null;
+    return this.name.substring(0, this.name.indexOf("~"));
+  }
+
+  String getSuffixName() {
+    if (!name.contains("~")) return name;
+    return this.name.substring(this.name.indexOf("~") + 1);
   }
 
   bool isLiked() {

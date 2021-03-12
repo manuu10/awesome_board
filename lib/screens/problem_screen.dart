@@ -208,44 +208,60 @@ class _ProblemScreenState extends State<ProblemScreen> {
                   children: [
                     CustomCard(
                       padding: 10,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      child: Column(
                         children: [
-                          Text((currentHistoryIndex + 1).toString() + "/" + history.length.toString(), style: TextStyle(color: _theme.foreground)),
-                          Expanded(
-                            child: Text(
-                              problem.getGradeString(),
-                              style: TextStyle(color: _theme.linksColor),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              problem.suitedForCustomBoard()
-                                  ? Icon(
-                                      Icons.check_circle_outline,
-                                      color: Colors.greenAccent,
-                                    )
-                                  : SizedBox(),
-                              problem.mirrorSuitedForCustomBoard()
-                                  ? Transform(
-                                      alignment: Alignment.topCenter,
-                                      transform: Matrix4.rotationY(math.pi),
-                                      child: Icon(
-                                        Icons.check_circle_outline,
-                                        color: Colors.yellowAccent,
-                                      ),
-                                    )
-                                  : SizedBox(),
+                              Text((currentHistoryIndex + 1).toString() + "/" + history.length.toString(),
+                                  style: TextStyle(color: _theme.foreground)),
+                              Expanded(
+                                child: Text(
+                                  problem.getGradeString(),
+                                  style: TextStyle(color: _theme.linksColor),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  problem.suitedForCustomBoard()
+                                      ? Icon(
+                                          Icons.check_circle_outline,
+                                          color: Colors.greenAccent,
+                                        )
+                                      : SizedBox(),
+                                  problem.mirrorSuitedForCustomBoard()
+                                      ? Transform(
+                                          alignment: Alignment.topCenter,
+                                          transform: Matrix4.rotationY(math.pi),
+                                          child: Icon(
+                                            Icons.check_circle_outline,
+                                            color: Colors.yellowAccent,
+                                          ),
+                                        )
+                                      : SizedBox(),
+                                ],
+                              ),
+                              Expanded(
+                                child: Text(
+                                  problem.getSuffixName(),
+                                  style: TextStyle(color: _theme.accentColor),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                             ],
                           ),
-                          Expanded(
-                            child: Text(
-                              problem.name,
-                              style: TextStyle(color: _theme.accentColor),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                          problem.getPrefixMethod() == null
+                              ? SizedBox()
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: problem.methodIcons(_theme.foreground),
+                                    ),
+                                    Text(problem.getPrefixMethod(), style: TextStyle(color: _theme.foreground)),
+                                  ],
+                                ),
                         ],
                       ),
                     ),

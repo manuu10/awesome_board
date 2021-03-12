@@ -16,6 +16,7 @@ dependencies:
   flutter_ble_lib: ^2.3.1
   flutter_launcher_icons: ^0.8.1
   fluttericon: ^1.0.7
+  font_awesome_flutter: ^8.12.0
   gradient_text: ^1.0.2
   hive: ^1.4.4+1
   hive_flutter: ^0.3.1
@@ -41,5 +42,6 @@ flutter:
 
   assets:
     - assets/database/moonboard_problems_setup_2016.json
+    - assets/database/moonboard_problems_setup_master2017.json
     - assets/database/moonboardDB.sqlite
     - assets/images/

@@ -72,8 +72,8 @@ class Utils {
       var box = Hive.box<Problem>("fetchedJsonProblems");
       problems.addAll(box.values.toList());
     }
-    problems = problems.where((e) => (e.holdsSetup == 1 || e.holdsSetup == 999) && e.holdsType == 4 && e.contains(search)).toList();
-
+    //problems = problems.where((e) => (e.holdsSetup == 1 || e.holdsSetup == 999) && e.holdsType == 4 && e.contains(search)).toList();
+    problems = problems.where((e) => e.contains(search)).toList();
     if (onlyFavorites) {
       problems = problems.where((e) => e.isLiked()).toList();
     }

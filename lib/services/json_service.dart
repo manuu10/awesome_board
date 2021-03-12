@@ -9,7 +9,7 @@ class JsonService {
   static Future<List<Problem>> fetchJsonFile() async {
     var content = await parseJsonFromAssets('assets/database/moonboard_problems_setup_2016.json');
 
-    return List<Problem>.from(
+    var twoK16 = List<Problem>.from(
       content.keys.map(
         (k) {
           var e = content[k];
@@ -18,7 +18,7 @@ class JsonService {
           var millDate = int.tryParse(e["DateInserted"].replaceAll(new RegExp(r'[^0-9]'), ''));
           return Problem(
             strId: "json-" + k,
-            name: e["Name"],
+            name: e["Method"] + "~" + e["Name"],
             author: e["Setter"]["Nickname"],
             grade: gradeStringToNumber(e["Grade"]),
             holds: movesToHoldsString(e["Moves"]),
@@ -27,6 +27,27 @@ class JsonService {
         },
       ),
     );
+    content = await parseJsonFromAssets('assets/database/moonboard_problems_setup_master2017.json');
+    var twoK17 = List<Problem>.from(
+      content.keys.map(
+        (k) {
+          var e = content[k];
+          //date in file => Date(8274892374892)
+          //filter out every char which isn't a number
+          var millDate = int.tryParse(e["DateInserted"].replaceAll(new RegExp(r'[^0-9]'), ''));
+          return Problem(
+            strId: "json17-" + k,
+            name: e["Method"] + "~" + e["Name"],
+            author: e["Setter"]["Nickname"],
+            grade: gradeStringToNumber(e["Grade"]),
+            holds: movesToHoldsString(e["Moves"]),
+            dateTime: DateTime.fromMillisecondsSinceEpoch(millDate),
+          );
+        },
+      ),
+    );
+    twoK16.addAll(twoK17);
+    return twoK16;
   }
 
   static Future<Map<String, dynamic>> parseJsonFromAssets(String assetsPath) async {
