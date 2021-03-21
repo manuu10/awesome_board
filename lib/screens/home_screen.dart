@@ -1,3 +1,4 @@
+import 'package:awesome_board/bloc/theme_bloc.dart';
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/screens/create_problem_screen.dart';
 import 'package:awesome_board/screens/overview_screen.dart';
@@ -5,6 +6,7 @@ import 'package:awesome_board/screens/settings_screen.dart';
 import 'package:awesome_board/widgets/gradient_icon.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  CustomTheme _theme = PalenightTheme();
   PageController _pageController;
   int _selectedIndex = 1;
 
@@ -28,10 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
       OverviewScreen(),
       SettingsScreen(),
     ];
-
-    Hive.box("settings").watch(key: "theme").listen((event) {
-      setState(() {});
-    });
   }
 
   @override
@@ -43,58 +40,61 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _theme = CustomTheme.getThemeFromStorage();
-    return Scaffold(
-      backgroundColor: _theme.background,
-      extendBody: true,
-      body: SafeArea(
-        child: PageView(
-          controller: _pageController,
-          onPageChanged: (index) {
-            setState(() => _selectedIndex = index);
-          },
-          children: _pages,
-        ),
-      ),
-      bottomNavigationBar: BottomNavyBar(
-        iconSize: 24,
-        backgroundColor: _theme.secondBackground,
-        selectedIndex: _selectedIndex,
-        showElevation: true, // use this to remove appBar's elevation
-        onItemSelected: (index) {
-          setState(() => _selectedIndex = index);
-          _pageController.animateToPage(index, duration: Duration(milliseconds: 300), curve: Curves.ease);
-        },
-        items: [
-          BottomNavyBarItem(
-            icon: GradientIcon(
-              Icons.add_box_outlined,
-              24,
-              _theme.linearGradient,
+    return BlocBuilder<ThemeBloc, CustomTheme>(
+      builder: (context, _theme) {
+        return Scaffold(
+          backgroundColor: _theme.background,
+          extendBody: true,
+          body: SafeArea(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() => _selectedIndex = index);
+              },
+              children: _pages,
             ),
-            title: Text('Create'),
-            activeColor: _theme.selectionForeground,
           ),
-          BottomNavyBarItem(
-            icon: GradientIcon(
-              Icons.dashboard_outlined,
-              24,
-              _theme.linearGradient,
-            ),
-            title: Text('Overview'),
-            activeColor: _theme.selectionForeground,
+          bottomNavigationBar: BottomNavyBar(
+            iconSize: 24,
+            backgroundColor: _theme.secondBackground,
+            selectedIndex: _selectedIndex,
+            showElevation: true, // use this to remove appBar's elevation
+            onItemSelected: (index) {
+              setState(() => _selectedIndex = index);
+              _pageController.animateToPage(index, duration: Duration(milliseconds: 300), curve: Curves.ease);
+            },
+            items: [
+              BottomNavyBarItem(
+                icon: GradientIcon(
+                  Icons.add_box_outlined,
+                  24,
+                  _theme.linearGradient,
+                ),
+                title: Text('Create'),
+                activeColor: _theme.selectionForeground,
+              ),
+              BottomNavyBarItem(
+                icon: GradientIcon(
+                  Icons.dashboard_outlined,
+                  24,
+                  _theme.linearGradient,
+                ),
+                title: Text('Overview'),
+                activeColor: _theme.selectionForeground,
+              ),
+              BottomNavyBarItem(
+                icon: GradientIcon(
+                  Icons.settings,
+                  24,
+                  _theme.linearGradient,
+                ),
+                title: Text('Settings'),
+                activeColor: _theme.selectionForeground,
+              ),
+            ],
           ),
-          BottomNavyBarItem(
-            icon: GradientIcon(
-              Icons.settings,
-              24,
-              _theme.linearGradient,
-            ),
-            title: Text('Settings'),
-            activeColor: _theme.selectionForeground,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

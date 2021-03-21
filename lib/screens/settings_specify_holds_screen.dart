@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:awesome_board/bloc/theme_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' as io;
 
@@ -15,7 +17,6 @@ class SettingsSpecifyHoldsScreen extends StatefulWidget {
 }
 
 class _SettingsSpecifyHoldsScreenState extends State<SettingsSpecifyHoldsScreen> {
-  CustomTheme _theme = CustomTheme.getThemeFromStorage();
   final double holdsHorizontal = 11;
   final double holdsVertical = 18;
   String message = "";
@@ -81,77 +82,81 @@ class _SettingsSpecifyHoldsScreenState extends State<SettingsSpecifyHoldsScreen>
   Widget build(BuildContext context) {
     double screenW = MediaQuery.of(context).size.width - (20 + 16);
     double imgH = screenW * 1.54;
-    return Container(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              margin: EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  SickButton(
-                      child: Icon(
-                        Icons.fullscreen_exit,
-                        color: _theme.foreground,
+    return BlocBuilder<ThemeBloc, CustomTheme>(
+      builder: (context, _theme) {
+        return Container(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.all(20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SickButton(
+                          child: Icon(
+                            Icons.fullscreen_exit,
+                            color: _theme.foreground,
+                          ),
+                          onPress: cancel),
+                      SickButton(
+                        child: Icon(Icons.check_circle, color: Colors.greenAccent),
+                        onPress: apply,
                       ),
-                      onPress: cancel),
-                  SickButton(
-                    child: Icon(Icons.check_circle, color: Colors.greenAccent),
-                    onPress: apply,
+                      SickButton(
+                          child: Icon(
+                            Icons.clear,
+                            color: Colors.orangeAccent,
+                          ),
+                          onPress: clearHolds),
+                    ],
                   ),
-                  SickButton(
-                      child: Icon(
-                        Icons.clear,
-                        color: Colors.orangeAccent,
+                ),
+                Center(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+                    padding: EdgeInsets.only(
+                      top: (imgH / 16.8),
+                      left: (screenW / 9.5),
+                      right: (screenW / 21.5),
+                      bottom: (imgH / 26),
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(10),
+                      image: DecorationImage(
+                        image: brdImage,
+                        fit: BoxFit.cover,
                       ),
-                      onPress: clearHolds),
-                ],
-              ),
-            ),
-            Center(
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-                padding: EdgeInsets.only(
-                  top: (imgH / 16.8),
-                  left: (screenW / 9.5),
-                  right: (screenW / 21.5),
-                  bottom: (imgH / 26),
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(10),
-                  image: DecorationImage(
-                    image: brdImage,
-                    fit: BoxFit.cover,
+                    ),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: ScrollPhysics(),
+                      clipBehavior: Clip.none,
+                      itemCount: (holdsHorizontal * holdsVertical).toInt(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: holdsHorizontal.toInt(),
+                      ),
+                      itemBuilder: (context, index) {
+                        Color outlineColor = Colors.transparent;
+
+                        if (holds.contains(index)) {
+                          outlineColor = Colors.cyanAccent;
+                        }
+
+                        return GestureDetector(
+                          onTap: () => addHold(index),
+                          child: CustomPaint(painter: DrawCircle(outlineColor)),
+                        );
+                      },
+                    ),
                   ),
                 ),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: ScrollPhysics(),
-                  clipBehavior: Clip.none,
-                  itemCount: (holdsHorizontal * holdsVertical).toInt(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: holdsHorizontal.toInt(),
-                  ),
-                  itemBuilder: (context, index) {
-                    Color outlineColor = Colors.transparent;
-
-                    if (holds.contains(index)) {
-                      outlineColor = Colors.cyanAccent;
-                    }
-
-                    return GestureDetector(
-                      onTap: () => addHold(index),
-                      child: CustomPaint(painter: DrawCircle(outlineColor)),
-                    );
-                  },
-                ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

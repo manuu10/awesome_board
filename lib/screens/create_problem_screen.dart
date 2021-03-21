@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:awesome_board/bloc/theme_bloc.dart';
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/models/path_generator.dart';
 import 'package:awesome_board/models/problem.dart';
@@ -13,6 +14,7 @@ import 'package:awesome_board/widgets/gen_random_route_dialog.dart';
 import 'package:awesome_board/widgets/save_dialog.dart';
 import 'package:awesome_board/widgets/sick_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' as io;
@@ -23,7 +25,6 @@ class CreateProblemScreen extends StatefulWidget {
 }
 
 class _CreateProblemScreenState extends State<CreateProblemScreen> {
-  final CustomTheme _theme = CustomTheme.getThemeFromStorage();
   final double holdsHorizontal = 11;
   final double holdsVertical = 18;
   String message = "";
@@ -193,183 +194,187 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
   Widget build(BuildContext context) {
     double screenW = MediaQuery.of(context).size.width - (20 + 20);
     double imgH = screenW * 1.54;
-    return Container(
-      child: Column(
-        children: [
-          Stack(
+    return BlocBuilder<ThemeBloc, CustomTheme>(
+      builder: (context, _theme) {
+        return Container(
+          child: Column(
             children: [
-              CustomAppBar(title: "Create"),
-              Container(
-                margin: EdgeInsets.all(10),
-                padding: EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: _theme.secondBackground,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _theme.notifications,
-                      blurRadius: 5,
-                      spreadRadius: -2,
-                      offset: Offset(0, 4),
+              Stack(
+                children: [
+                  CustomAppBar(title: "Create"),
+                  Container(
+                    margin: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: _theme.secondBackground,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _theme.notifications,
+                          blurRadius: 5,
+                          spreadRadius: -2,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _bleService.finishedScanAndFoundDevice
-                        ? Icon(Icons.check_circle, color: Colors.greenAccent)
-                        : Icon(Icons.cancel, color: Colors.redAccent),
-                    Icon(
-                      Icons.bluetooth,
-                      color: Colors.blueAccent,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _bleService.finishedScanAndFoundDevice
+                            ? Icon(Icons.check_circle, color: Colors.greenAccent)
+                            : Icon(Icons.cancel, color: Colors.redAccent),
+                        Icon(
+                          Icons.bluetooth,
+                          color: Colors.blueAccent,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              Text(
+                message,
+                style: TextStyle(color: _theme.foreground),
+              ),
+              SizedBox(height: 10),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(0.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            SickButton(
+                              child: Icon(
+                                Icons.save,
+                                color: Colors.orange,
+                              ),
+                              onPress: openSaveDialog,
+                            ),
+                            SickButton(
+                              child: Icon(
+                                Icons.shuffle,
+                                color: _theme.foreground,
+                              ),
+                              onPress: shuffleHolds,
+                            ),
+                            SickButton(
+                              child: Icon(Icons.swap_horiz, color: !customBoard ? Colors.yellow : Colors.blue),
+                              onPress: () {
+                                customBoard = !customBoard;
+                                checkImage();
+                              },
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            SickButton(
+                              child: Icon(
+                                _curHoldType == HoldType.startHold ? Icons.lens_outlined : Icons.lens,
+                                color: Colors.greenAccent,
+                              ),
+                              onPress: () {
+                                setState(() {
+                                  _curHoldType = HoldType.startHold;
+                                });
+                              },
+                            ),
+                            SickButton(
+                              child: Icon(
+                                _curHoldType == HoldType.normalHold ? Icons.lens_outlined : Icons.lens,
+                                color: Colors.blueAccent,
+                              ),
+                              onPress: () {
+                                setState(() {
+                                  _curHoldType = HoldType.normalHold;
+                                });
+                              },
+                            ),
+                            SickButton(
+                              child: Icon(
+                                _curHoldType == HoldType.finishHold ? Icons.lens_outlined : Icons.lens,
+                                color: Colors.redAccent,
+                              ),
+                              onPress: () {
+                                setState(() {
+                                  _curHoldType = HoldType.finishHold;
+                                });
+                              },
+                            ),
+                            SickButton(
+                              child: Icon(
+                                Icons.clear,
+                                color: Colors.orange,
+                              ),
+                              onPress: clearHolds,
+                            ),
+                          ],
+                        ),
+                        CustomCard(
+                          padding: 10,
+                          child: Container(
+                            padding: EdgeInsets.only(
+                              top: (imgH / 16.8),
+                              left: (screenW / 9.5),
+                              right: (screenW / 21.5),
+                              bottom: (imgH / 26),
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              borderRadius: BorderRadius.circular(10),
+                              image: DecorationImage(
+                                image: brdImage,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            child: GridView.builder(
+                              shrinkWrap: true,
+                              physics: ScrollPhysics(),
+                              clipBehavior: Clip.none,
+                              itemCount: (holdsHorizontal * holdsVertical).toInt(),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: holdsHorizontal.toInt(),
+                              ),
+                              itemBuilder: (context, index) {
+                                int hIn = holds.indexWhere((e) => Utils.convert2DTo1D(e.location, holdsHorizontal.toInt()) == index);
+                                Color outlineColor = Colors.transparent;
+
+                                if (hIn != -1) {
+                                  Hold h = holds[hIn];
+                                  switch (h.holdType) {
+                                    case HoldType.finishHold:
+                                      outlineColor = Colors.redAccent;
+                                      break;
+                                    case HoldType.startHold:
+                                      outlineColor = Colors.greenAccent;
+                                      break;
+                                    case HoldType.normalHold:
+                                      outlineColor = Colors.blueAccent;
+                                      break;
+                                  }
+                                }
+
+                                return GestureDetector(
+                                  onTap: () => addHold(index),
+                                  child: CustomPaint(painter: DrawCircle(outlineColor)),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
-          Text(
-            message,
-            style: TextStyle(color: _theme.foreground),
-          ),
-          SizedBox(height: 10),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        SickButton(
-                          child: Icon(
-                            Icons.save,
-                            color: Colors.orange,
-                          ),
-                          onPress: openSaveDialog,
-                        ),
-                        SickButton(
-                          child: Icon(
-                            Icons.shuffle,
-                            color: _theme.foreground,
-                          ),
-                          onPress: shuffleHolds,
-                        ),
-                        SickButton(
-                          child: Icon(Icons.swap_horiz, color: !customBoard ? Colors.yellow : Colors.blue),
-                          onPress: () {
-                            customBoard = !customBoard;
-                            checkImage();
-                          },
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        SickButton(
-                          child: Icon(
-                            _curHoldType == HoldType.startHold ? Icons.lens_outlined : Icons.lens,
-                            color: Colors.greenAccent,
-                          ),
-                          onPress: () {
-                            setState(() {
-                              _curHoldType = HoldType.startHold;
-                            });
-                          },
-                        ),
-                        SickButton(
-                          child: Icon(
-                            _curHoldType == HoldType.normalHold ? Icons.lens_outlined : Icons.lens,
-                            color: Colors.blueAccent,
-                          ),
-                          onPress: () {
-                            setState(() {
-                              _curHoldType = HoldType.normalHold;
-                            });
-                          },
-                        ),
-                        SickButton(
-                          child: Icon(
-                            _curHoldType == HoldType.finishHold ? Icons.lens_outlined : Icons.lens,
-                            color: Colors.redAccent,
-                          ),
-                          onPress: () {
-                            setState(() {
-                              _curHoldType = HoldType.finishHold;
-                            });
-                          },
-                        ),
-                        SickButton(
-                          child: Icon(
-                            Icons.clear,
-                            color: Colors.orange,
-                          ),
-                          onPress: clearHolds,
-                        ),
-                      ],
-                    ),
-                    CustomCard(
-                      padding: 10,
-                      child: Container(
-                        padding: EdgeInsets.only(
-                          top: (imgH / 16.8),
-                          left: (screenW / 9.5),
-                          right: (screenW / 21.5),
-                          bottom: (imgH / 26),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(10),
-                          image: DecorationImage(
-                            image: brdImage,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: ScrollPhysics(),
-                          clipBehavior: Clip.none,
-                          itemCount: (holdsHorizontal * holdsVertical).toInt(),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: holdsHorizontal.toInt(),
-                          ),
-                          itemBuilder: (context, index) {
-                            int hIn = holds.indexWhere((e) => Utils.convert2DTo1D(e.location, holdsHorizontal.toInt()) == index);
-                            Color outlineColor = Colors.transparent;
-
-                            if (hIn != -1) {
-                              Hold h = holds[hIn];
-                              switch (h.holdType) {
-                                case HoldType.finishHold:
-                                  outlineColor = Colors.redAccent;
-                                  break;
-                                case HoldType.startHold:
-                                  outlineColor = Colors.greenAccent;
-                                  break;
-                                case HoldType.normalHold:
-                                  outlineColor = Colors.blueAccent;
-                                  break;
-                              }
-                            }
-
-                            return GestureDetector(
-                              onTap: () => addHold(index),
-                              child: CustomPaint(painter: DrawCircle(outlineColor)),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
+        );
+      },
     );
   }
 }

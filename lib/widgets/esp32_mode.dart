@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:awesome_board/bloc/theme_bloc.dart';
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Esp32Mode extends StatefulWidget {
   final Stream esp32Read;
@@ -12,7 +14,6 @@ class Esp32Mode extends StatefulWidget {
 }
 
 class _Esp32ModeState extends State<Esp32Mode> {
-  final CustomTheme _theme = CustomTheme.getThemeFromStorage();
   @override
   void initState() {
     super.initState();
@@ -37,40 +38,44 @@ class _Esp32ModeState extends State<Esp32Mode> {
           text = "LED Testing";
         }
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: _theme.background,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: col,
-                    blurRadius: 5,
-                    spreadRadius: 1,
+        return BlocBuilder<ThemeBloc, CustomTheme>(
+          builder: (context, theme) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: theme.background,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: col,
+                        blurRadius: 5,
+                        spreadRadius: 1,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              padding: EdgeInsets.all(5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(color: col, shape: BoxShape.circle),
-                    width: 20,
-                    height: 20,
+                  padding: EdgeInsets.all(5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(color: col, shape: BoxShape.circle),
+                        width: 20,
+                        height: 20,
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        text,
+                        style: TextStyle(color: col),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 10),
-                  Text(
-                    text,
-                    style: TextStyle(color: col),
-                  ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         );
       },
     );

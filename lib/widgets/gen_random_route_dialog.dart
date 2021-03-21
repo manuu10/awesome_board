@@ -1,5 +1,7 @@
+import 'package:awesome_board/bloc/theme_bloc.dart';
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 
 class GenereateRandomRouteDialog extends StatefulWidget {
@@ -8,8 +10,6 @@ class GenereateRandomRouteDialog extends StatefulWidget {
 }
 
 class _GenereateRandomRouteDialogState extends State<GenereateRandomRouteDialog> {
-  CustomTheme _theme = CustomTheme.getThemeFromStorage();
-
   Box _box;
   TextEditingController txtLength = TextEditingController();
   TextEditingController txtDistance = TextEditingController();
@@ -40,110 +40,114 @@ class _GenereateRandomRouteDialogState extends State<GenereateRandomRouteDialog>
   }
 
   contentBox(context) {
-    return Stack(
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            color: _theme.background,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: _theme.contrast,
-                blurRadius: 5,
-                spreadRadius: -2,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                "Problem generieren",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: _theme.foreground),
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: txtLength,
-                      style: TextStyle(color: _theme.foreground),
-                      cursorColor: _theme.accentColor,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        labelStyle: TextStyle(color: _theme.disabled),
-                        labelText: "Anzahl Griffe",
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 2,
-                            color: _theme.accentColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: txtDistance,
-                      style: TextStyle(color: _theme.foreground),
-                      cursorColor: _theme.accentColor,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        labelStyle: TextStyle(color: _theme.disabled),
-                        labelText: "Max Entfernung Griffe",
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 2,
-                            color: _theme.accentColor,
-                          ),
-                        ),
-                      ),
-                    ),
+    return BlocBuilder<ThemeBloc, CustomTheme>(
+      builder: (context, theme) {
+        return Stack(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                color: theme.background,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.contrast,
+                    blurRadius: 5,
+                    spreadRadius: -2,
+                    offset: Offset(0, 4),
                   ),
                 ],
               ),
-              SizedBox(
-                height: 22,
-              ),
-              Divider(
-                thickness: 1,
-                color: _theme.highlight,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  FlatButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      "Cancel",
-                      style: TextStyle(fontSize: 18, color: _theme.foreground),
-                    ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    "Problem generieren",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: theme.foreground),
                   ),
-                  FlatButton(
-                    onPressed: () {
-                      cacheInput();
-                      Navigator.of(context).pop<List>([txtLength.text, txtDistance.text]);
-                    },
-                    child: Text(
-                      "Gogogogo",
-                      style: TextStyle(fontSize: 18, color: _theme.foreground),
-                    ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: txtLength,
+                          style: TextStyle(color: theme.foreground),
+                          cursorColor: theme.accentColor,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            labelStyle: TextStyle(color: theme.disabled),
+                            labelText: "Anzahl Griffe",
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                width: 2,
+                                color: theme.accentColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: txtDistance,
+                          style: TextStyle(color: theme.foreground),
+                          cursorColor: theme.accentColor,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            labelStyle: TextStyle(color: theme.disabled),
+                            labelText: "Max Entfernung Griffe",
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                width: 2,
+                                color: theme.accentColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 22,
+                  ),
+                  Divider(
+                    thickness: 1,
+                    color: theme.highlight,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          "Cancel",
+                          style: TextStyle(fontSize: 18, color: theme.foreground),
+                        ),
+                      ),
+                      FlatButton(
+                        onPressed: () {
+                          cacheInput();
+                          Navigator.of(context).pop<List>([txtLength.text, txtDistance.text]);
+                        },
+                        child: Text(
+                          "Gogogogo",
+                          style: TextStyle(fontSize: 18, color: theme.foreground),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }

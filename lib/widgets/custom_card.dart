@@ -1,8 +1,9 @@
+import 'package:awesome_board/bloc/theme_bloc.dart';
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CustomCard extends StatelessWidget {
-  final CustomTheme theme = CustomTheme.getThemeFromStorage();
   final Widget child;
   final Widget headChild;
   final Function onPress;
@@ -24,41 +25,45 @@ class CustomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        GestureDetector(
-          onTap: onPress,
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(padding),
-            margin: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              borderRadius: borderRadius,
-              color: theme.secondBackground,
-              boxShadow: [
-                BoxShadow(
-                  color: theme.notifications,
-                  blurRadius: 5,
-                  spreadRadius: -2,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: child,
-          ),
-        ),
-        headChild == null
-            ? SizedBox()
-            : Container(
-                padding: EdgeInsets.all(4),
+    return BlocBuilder<ThemeBloc, CustomTheme>(
+      builder: (context, theme) {
+        return Stack(
+          children: [
+            GestureDetector(
+              onTap: onPress,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(padding),
+                margin: EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  shape: headChild is Text ? BoxShape.rectangle : BoxShape.circle,
-                  color: theme.contrast,
-                  borderRadius: headChild is Text ? BorderRadius.circular(10) : null,
+                  borderRadius: borderRadius,
+                  color: theme.secondBackground,
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.notifications,
+                      blurRadius: 5,
+                      spreadRadius: -2,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: headChild,
+                child: child,
               ),
-      ],
+            ),
+            headChild == null
+                ? SizedBox()
+                : Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: headChild is Text ? BoxShape.rectangle : BoxShape.circle,
+                      color: theme.contrast,
+                      borderRadius: headChild is Text ? BorderRadius.circular(10) : null,
+                    ),
+                    child: headChild,
+                  ),
+          ],
+        );
+      },
     );
   }
 }
