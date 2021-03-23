@@ -19,6 +19,7 @@ dependencies:
   fluttericon: ^1.0.7
   font_awesome_flutter: ^8.12.0
   gradient_text: ^1.0.2
+  grouped_list: ^3.7.1
   hive: ^1.4.4+1
   hive_flutter: ^0.3.1
   hive_generator: ^0.8.2

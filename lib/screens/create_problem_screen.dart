@@ -8,6 +8,7 @@ import 'package:awesome_board/models/path_generator.dart';
 import 'package:awesome_board/models/problem.dart';
 import 'package:awesome_board/models/utils.dart';
 import 'package:awesome_board/services/ble_service.dart';
+import 'package:awesome_board/widgets/ble_status_builder.dart';
 import 'package:awesome_board/widgets/custom_app_bar.dart';
 import 'package:awesome_board/widgets/custom_card.dart';
 import 'package:awesome_board/widgets/gen_random_route_dialog.dart';
@@ -33,7 +34,7 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
   PathGenerator pathGen = PathGenerator();
   StreamSubscription _liveRandomSub;
   StreamSubscription _liveRandomFinishSub;
-  StreamSubscription _bleSubscription;
+
   BleService _bleService = BleService();
   bool customBoard = true;
   String imgPath = "./assets/images/custom_moonboard.png";
@@ -44,7 +45,6 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
     super.dispose();
     await _liveRandomFinishSub.cancel();
     await _liveRandomSub.cancel();
-    await _bleSubscription.cancel();
     await pathGen.dispose();
     await _bleService.cleanup();
   }
@@ -52,11 +52,7 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
   @override
   void initState() {
     super.initState();
-    _bleSubscription = _bleService.streamInformation.listen((event) {
-      if (event == BleInformationType.deviceReady) {
-        setState(() {});
-      }
-    });
+
     _liveRandomSub = pathGen.stream.listen((event) {
       var temp = event.map((e) => Hold(holdType: HoldType.normalHold, location: Utils.flipOverY(e, 17))).toList();
       holds = temp;
@@ -202,34 +198,7 @@ class _CreateProblemScreenState extends State<CreateProblemScreen> {
               Stack(
                 children: [
                   CustomAppBar(title: "Create"),
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: _theme.secondBackground,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _theme.notifications,
-                          blurRadius: 5,
-                          spreadRadius: -2,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _bleService.finishedScanAndFoundDevice
-                            ? Icon(Icons.check_circle, color: Colors.greenAccent)
-                            : Icon(Icons.cancel, color: Colors.redAccent),
-                        Icon(
-                          Icons.bluetooth,
-                          color: Colors.blueAccent,
-                        ),
-                      ],
-                    ),
-                  ),
+                  BleStatusBuilder(bleState: _bleService.streamInformation),
                 ],
               ),
               Text(

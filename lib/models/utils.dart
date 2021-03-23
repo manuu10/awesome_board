@@ -126,4 +126,34 @@ class Utils {
     });
     return retVal;
   }
+
+  static String dayEnToDeLang(String day) {
+    switch (day) {
+      case "Monday":
+        return "Montag";
+        break;
+      case "Tuesday":
+        return "Dienstag";
+        break;
+      case "Wednesday":
+        return "Mittwoch";
+        break;
+      case "Thursday":
+        return "Donnerstag";
+        break;
+
+      case "Friday":
+        return "Freitag";
+        break;
+      case "Saturday":
+        return "Montag";
+        break;
+      case "Sunday":
+        return "Sonntag";
+        break;
+      default:
+        return day;
+        break;
+    }
+  }
 }

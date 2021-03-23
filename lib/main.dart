@@ -12,6 +12,7 @@ void main() async {
   Hive.registerAdapter(ProblemAdapter());
   await Hive.openBox("settings");
   await Hive.openBox("problemsLiked");
+  await Hive.openBox<Problem>("history");
   await Hive.openBox<Problem>("customProblems");
   await Hive.openBox<Problem>("fetchedProblems");
   await Hive.openBox<Problem>("fetchedJsonProblems");

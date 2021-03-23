@@ -9,6 +9,9 @@ import 'package:awesome_board/widgets/custom_app_bar.dart';
 import 'package:awesome_board/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:grouped_list/grouped_list.dart';
+import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 
 class OverviewScreen extends StatefulWidget {
   @override
@@ -19,6 +22,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
   final CustomTheme _theme = CustomTheme.getThemeFromStorage();
 
   List<Problem> problems = [];
+  Map<DateTime, Problem> history = {};
+  bool showHistory = false;
   int problemAmount = 0;
   var txtCtrl = TextEditingController();
   var scrCtrl = ScrollController();
@@ -30,7 +35,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   void _refreshProblems() {
-    problems = Utils.fetchProblemUseSettings(txtCtrl.text);
+    if (!showHistory)
+      problems = Utils.fetchProblemUseSettings(txtCtrl.text);
+    else {
+      var box = Hive.box<Problem>("history");
+      history = box.toMap().map((key, value) => MapEntry(DateTime.parse(key.toString()), value));
+    }
     setState(() {});
   }
 
@@ -111,10 +121,47 @@ class _OverviewScreenState extends State<OverviewScreen> {
                           radius: Radius.circular(10),
                           isAlwaysShown: true,
                           controller: scrCtrl,
-                          child: ListView(
-                            controller: scrCtrl,
-                            padding: EdgeInsets.only(right: 10),
-                            children: problems.map((e) => e.getWidget(problems)).toList(),
+                          child: Builder(
+                            builder: (context) {
+                              if (showHistory) {
+                                return GroupedListView<MapEntry<DateTime, Problem>, String>(
+                                  physics: BouncingScrollPhysics(),
+                                  groupBy: (element) => DateFormat("yyyy - MM - dd").format(element.key),
+                                  elements: history.entries.toList(),
+                                  groupHeaderBuilder: (entry) {
+                                    return Container(
+                                      padding: EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: _theme.highlight,
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Text(
+                                            Utils.dayEnToDeLang(DateFormat("EEEE").format(entry.key)),
+                                            style: TextStyle(color: _theme.foreground),
+                                          ),
+                                          Center(
+                                            child: Text(
+                                              DateFormat("yyyy - MM - dd").format(entry.key),
+                                              style: TextStyle(color: _theme.foreground),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  itemBuilder: (context, entry) {
+                                    return entry.value.getWidget(history.values.toList(), fromHistory: true);
+                                  },
+                                  order: GroupedListOrder.DESC,
+                                );
+                              }
+                              return ListView(
+                                controller: scrCtrl,
+                                padding: EdgeInsets.only(right: 10),
+                                children: problems.map((e) => e.getWidget(problems)).toList(),
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -136,6 +183,26 @@ class _OverviewScreenState extends State<OverviewScreen> {
                       color: _theme.linksColor,
                     ),
                     onPressed: _refreshProblems,
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: FloatingActionButton(
+                    elevation: 10,
+                    backgroundColor: showHistory ? _theme.linksColor : _theme.highlight,
+                    child: Icon(
+                      Icons.history,
+                      color: showHistory ? _theme.highlight : _theme.linksColor,
+                    ),
+                    onPressed: () {
+                      showHistory = !showHistory;
+                      _refreshProblems();
+                    },
                   ),
                 ),
               ),

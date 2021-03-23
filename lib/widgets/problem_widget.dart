@@ -12,10 +12,12 @@ class ProblemWidget extends StatefulWidget {
   _ProblemWidgetState createState() => _ProblemWidgetState();
   final Problem problem;
   final List<Problem> problems;
+  final bool fromHistory;
   const ProblemWidget({
     Key key,
     this.problem,
     this.problems,
+    this.fromHistory = false,
   }) : super(key: key);
 }
 
@@ -31,6 +33,7 @@ class _ProblemWidgetState extends State<ProblemWidget> {
           child: ProblemScreen(
             problem: this.widget.problem,
             problems: this.widget.problems,
+            fromHistory: this.widget.fromHistory,
           ),
         );
       },

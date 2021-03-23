@@ -6,6 +6,7 @@ import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/models/problem.dart';
 import 'package:awesome_board/models/utils.dart';
 import 'package:awesome_board/services/ble_service.dart';
+import 'package:awesome_board/widgets/ble_status_builder.dart';
 import 'package:awesome_board/widgets/custom_app_bar.dart';
 import 'package:awesome_board/widgets/custom_card.dart';
 import 'package:awesome_board/widgets/custom_dialog.dart';
@@ -20,11 +21,13 @@ import 'dart:math' as math;
 class ProblemScreen extends StatefulWidget {
   final Problem problem;
   final List<Problem> problems;
+  final bool fromHistory;
 
   const ProblemScreen({
     Key key,
     this.problem,
     this.problems,
+    this.fromHistory = false,
   }) : super(key: key);
   @override
   _ProblemScreenState createState() => _ProblemScreenState();
@@ -41,31 +44,25 @@ class _ProblemScreenState extends State<ProblemScreen> {
   bool liked;
   bool mirror;
   final BleService _bleService = BleService();
-  StreamSubscription<BleInformationType> _bleSubscription;
   List<Problem> history = [];
-
   ImageProvider brdImage;
 
   @override
   void dispose() async {
     super.dispose();
-    await _bleSubscription.cancel();
     await _bleService.cleanup();
   }
 
   @override
   void initState() {
     problem = this.widget.problem;
+    this.widget.problems.remove(problem);
     liked = problem.isLiked();
     customBoard = true;
     mirror = false;
     history.add(problem);
+    if (!this.widget.fromHistory) problem.addToHistory();
     super.initState();
-    _bleSubscription = _bleService.streamInformation.listen((event) {
-      if (event == BleInformationType.deviceReady) {
-        setState(() {});
-      }
-    });
     brdImage = AssetImage("./assets/images/custom_moonboard.png");
     checkImage();
   }
@@ -120,10 +117,12 @@ class _ProblemScreenState extends State<ProblemScreen> {
   }
 
   void nextProblem() {
+    if (this.widget.problems.isEmpty) return;
     setState(() {
       if (currentHistoryIndex == history.length - 1) {
         problem = this.widget.problems.removeAt(Random().nextInt(this.widget.problems.length));
         history.add(problem);
+        if (!this.widget.fromHistory) problem.addToHistory();
         currentHistoryIndex = history.length - 1;
       } else {
         currentHistoryIndex++;
@@ -156,39 +155,12 @@ class _ProblemScreenState extends State<ProblemScreen> {
             Stack(
               children: [
                 CustomAppBar(title: "Problem"),
-                Container(
-                  margin: EdgeInsets.all(10),
-                  padding: EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: _theme.secondBackground,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _theme.notifications,
-                        blurRadius: 5,
-                        spreadRadius: -2,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _bleService.finishedScanAndFoundDevice
-                          ? Icon(Icons.check_circle, color: Colors.greenAccent)
-                          : Icon(Icons.cancel, color: Colors.redAccent),
-                      Icon(
-                        Icons.bluetooth,
-                        color: Colors.blueAccent,
-                      ),
-                    ],
-                  ),
-                ),
+                BleStatusBuilder(bleState: _bleService.streamInformation),
                 Positioned.fill(
                   child: Align(
                     alignment: Alignment.topRight,
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.only(right: 8.0),
                       child: IconButton(
                         icon: Icon(
                           liked ? Icons.favorite : Icons.favorite_border,

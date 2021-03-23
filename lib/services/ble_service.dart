@@ -12,7 +12,7 @@ class BleService {
   StreamSubscription scanSubscribtion;
   BleManager bleManager;
   final _controllerRead = StreamController<String>();
-  final _controllerInformation = StreamController<BleInformationType>();
+  final _controllerInformation = StreamController<PeripheralConnectionState>();
 
   final String _bleName = "moonboard :)";
   final String _serviceUUID = "4fb8a9be-c293-4459-a39f-ccf92a532eb5";
@@ -27,7 +27,7 @@ class BleService {
   bool isWriting = false;
 
   Stream<String> get streamRead => _controllerRead.stream;
-  Stream<BleInformationType> get streamInformation => _controllerInformation.stream;
+  Stream<PeripheralConnectionState> get streamInformation => _controllerInformation.stream;
   Stream<CharacteristicWithValue> get monitor => currentDevice.peripheral.monitorCharacteristic(_serviceUUID, _characteristicsReadUUID);
 
   BleService() {
@@ -78,7 +78,7 @@ class BleService {
   }
 
   Future<void> connect() async {
-    if (currentDevice == null) return;
+    if (currentDevice == null) return _controllerInformation.sink.add(PeripheralConnectionState.disconnected);
     bool cnctd = await currentDevice.peripheral.isConnected();
     if (!cnctd) {
       await currentDevice.peripheral.connect(requestMtu: 500);
@@ -90,24 +90,33 @@ class BleService {
     bleManager = BleManager();
     await bleManager.createClient();
 
-    scanSubscribtion = bleManager.observeBluetoothState().listen(
-      (btState) {
-        if (btState == BluetoothState.POWERED_ON) {
-          bleManager.startPeripheralScan().listen((scanResult) async {
-            var bleDevice = BleDevice(scanResult);
-            if (bleDevice.name.contains(this._bleName) && currentDevice == null) {
-              currentDevice = bleDevice;
-              await bleManager.stopPeripheralScan();
-              scanSubscribtion.cancel();
-              await connect();
-              await currentDevice.peripheral.discoverAllServicesAndCharacteristics(transactionId: "discSC_1");
-              finishedScanAndFoundDevice = true;
-              _controllerInformation.sink.add(BleInformationType.deviceReady);
-            }
-          });
-        }
-      },
-    );
+    _controllerInformation.sink.add(PeripheralConnectionState.connecting);
+    try {
+      scanSubscribtion = bleManager.observeBluetoothState().listen(
+        (btState) {
+          if (btState == BluetoothState.POWERED_ON) {
+            bleManager.startPeripheralScan().listen((scanResult) async {
+              var bleDevice = BleDevice(scanResult);
+              if (bleDevice.name.contains(this._bleName) && currentDevice == null) {
+                currentDevice = bleDevice;
+                await bleManager.stopPeripheralScan();
+                scanSubscribtion.cancel();
+                await connect();
+                await currentDevice.peripheral.discoverAllServicesAndCharacteristics(transactionId: "discSC_1");
+                finishedScanAndFoundDevice = true;
+                _controllerInformation.sink.add(PeripheralConnectionState.connected);
+              } else {
+                _controllerInformation.sink.add(PeripheralConnectionState.disconnected);
+              }
+            });
+          } else {
+            _controllerInformation.sink.add(PeripheralConnectionState.disconnected);
+          }
+        },
+      );
+    } catch (e) {
+      _controllerInformation.sink.add(PeripheralConnectionState.disconnected);
+    }
   }
 
   Future<String> readData() async {
@@ -132,5 +141,7 @@ class BleService {
 }
 
 enum BleInformationType {
-  deviceReady,
+  deviceNotConnected,
+  deviceLoading,
+  deviceConnected,
 }

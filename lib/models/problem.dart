@@ -153,10 +153,16 @@ class Problem {
     await box.delete(this.strId);
   }
 
-  Widget getWidget(List<Problem> problems) {
+  void addToHistory() async {
+    var box = Hive.box<Problem>("history");
+    await box.put(DateTime.now().toString(), this);
+  }
+
+  Widget getWidget(List<Problem> problems, {bool fromHistory = false}) {
     return ProblemWidget(
       problem: this,
       problems: problems,
+      fromHistory: fromHistory,
     );
   }
 

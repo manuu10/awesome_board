@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:awesome_board/bloc/theme_bloc.dart';
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/services/ble_service.dart';
+import 'package:awesome_board/widgets/ble_status_builder.dart';
 import 'package:awesome_board/widgets/custom_app_bar.dart';
 import 'package:awesome_board/widgets/custom_card.dart';
 import 'package:awesome_board/widgets/esp32_mode.dart';
 import 'package:awesome_board/widgets/gradient_icon.dart';
 import 'package:awesome_board/widgets/sick_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ble_lib/flutter_ble_lib.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LedTesterScreen extends StatefulWidget {
@@ -21,7 +23,7 @@ class LedTesterScreen extends StatefulWidget {
 
 class _LedTesterScreenState extends State<LedTesterScreen> {
   final BleService _bleService = BleService();
-  StreamSubscription<BleInformationType> _bleSubscription;
+  StreamSubscription<PeripheralConnectionState> _bleSubscription;
 
   @override
   void dispose() async {
@@ -36,9 +38,7 @@ class _LedTesterScreenState extends State<LedTesterScreen> {
     super.initState();
     _bleService.startReading();
     _bleSubscription = _bleService.streamInformation.listen((event) {
-      if (event == BleInformationType.deviceReady) {
-        setState(() {});
-      }
+      setState(() {});
     });
   }
 
@@ -57,35 +57,8 @@ class _LedTesterScreenState extends State<LedTesterScreen> {
             children: [
               Stack(
                 children: [
-                  CustomAppBar(title: "Problem"),
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: _theme.secondBackground,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _theme.notifications,
-                          blurRadius: 5,
-                          spreadRadius: -2,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _bleService.finishedScanAndFoundDevice
-                            ? Icon(Icons.check_circle, color: Colors.greenAccent)
-                            : Icon(Icons.cancel, color: Colors.redAccent),
-                        Icon(
-                          Icons.bluetooth,
-                          color: Colors.blueAccent,
-                        ),
-                      ],
-                    ),
-                  ),
+                  CustomAppBar(title: "LED TESTER"),
+                  BleStatusBuilder(bleState: _bleService.streamInformation),
                 ],
               ),
               Expanded(

@@ -15,12 +15,12 @@ class CustomAppBar extends StatelessWidget {
       builder: (context, theme) {
         return Container(
           margin: EdgeInsets.symmetric(horizontal: 5),
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(5),
           decoration: BoxDecoration(
             color: theme.secondBackground,
             borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(50),
-              bottomRight: Radius.circular(50),
+              bottomLeft: Radius.circular(10),
+              bottomRight: Radius.circular(10),
             ),
             boxShadow: [
               BoxShadow(
@@ -37,7 +37,7 @@ class CustomAppBar extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 50,
+                    fontSize: 35,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 5,
                     shadows: [
@@ -49,7 +49,7 @@ class CustomAppBar extends StatelessWidget {
                   title,
                   gradient: theme.linearGradient,
                   style: TextStyle(
-                    fontSize: 50,
+                    fontSize: 35,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 5,
                   ),
