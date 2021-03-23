@@ -24,6 +24,7 @@ dependencies:
   hive_flutter: ^0.3.1
   hive_generator: ^0.8.2
   http: ^0.12.2
+  intl: ^0.17.0
   permission_handler: ^4.2.0+hotfix.3
   sqflite: null
   url_launcher: ^5.7.10
