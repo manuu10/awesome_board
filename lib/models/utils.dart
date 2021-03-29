@@ -46,10 +46,16 @@ class Utils {
     bool custom = _box.get("showCustomProblems") ?? false;
     bool database = _box.get("showDatabaseProblems") ?? false;
     bool jsonFile = _box.get("showJsonFileProblems") ?? false;
-    return fetchProblems(search: search, custom: custom, database: database, jsonFile: jsonFile);
+    return fetchProblems(
+        search: search, custom: custom, database: database, jsonFile: jsonFile);
   }
 
-  static List<Problem> fetchProblems({bool custom = false, bool mirror = false, bool database = false, bool jsonFile = false, String search = ""}) {
+  static List<Problem> fetchProblems(
+      {bool custom = false,
+      bool mirror = false,
+      bool database = false,
+      bool jsonFile = false,
+      String search = ""}) {
     List<Problem> problems = [];
     var box = Hive.box("settings");
 
@@ -82,12 +88,16 @@ class Utils {
     }
     if (onlyCustomHolds || mirrorCustomHolds) {
       if (onlyCustomHolds && mirrorCustomHolds) {
-        problems = problems.where((e) => e.suitedForCustomBoard() || e.mirrorSuitedForCustomBoard()).toList();
+        problems = problems
+            .where((e) =>
+                e.suitedForCustomBoard() || e.mirrorSuitedForCustomBoard())
+            .toList();
       } else {
         if (onlyCustomHolds)
           problems = problems.where((e) => e.suitedForCustomBoard()).toList();
         else
-          problems = problems.where((e) => e.mirrorSuitedForCustomBoard()).toList();
+          problems =
+              problems.where((e) => e.mirrorSuitedForCustomBoard()).toList();
       }
     }
     if (containsSpecifiedHolds) {
@@ -146,7 +156,7 @@ class Utils {
         return "Freitag";
         break;
       case "Saturday":
-        return "Montag";
+        return "Samstag";
         break;
       case "Sunday":
         return "Sonntag";

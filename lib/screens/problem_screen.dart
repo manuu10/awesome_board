@@ -46,11 +46,16 @@ class _ProblemScreenState extends State<ProblemScreen> {
   final BleService _bleService = BleService();
   List<Problem> history = [];
   ImageProvider brdImage;
+  DateTime problemOpened = DateTime.now();
+
+  Timer t;
 
   @override
   void dispose() async {
     super.dispose();
     await _bleService.cleanup();
+
+    t.cancel();
   }
 
   @override
@@ -61,10 +66,19 @@ class _ProblemScreenState extends State<ProblemScreen> {
     customBoard = true;
     mirror = false;
     history.add(problem);
-    if (!this.widget.fromHistory) problem.addToHistory();
     super.initState();
     brdImage = AssetImage("./assets/images/custom_moonboard.png");
     checkImage();
+    resetTimer();
+  }
+
+  void resetTimer() {
+    t?.cancel();
+    t = new Timer(Duration(seconds: 45), () {
+      if (history.contains(problem) && problem.isInHistory()) return;
+      if (!this.widget.fromHistory) problem.addToHistory();
+      setState(() {});
+    });
   }
 
   void checkImage() async {
@@ -77,16 +91,20 @@ class _ProblemScreenState extends State<ProblemScreen> {
         brdImage = AssetImage("./assets/images/custom_moonboard.png");
       }
     } else {
-      brdImage = AssetImage("./assets/images/A_2016-B_2016-OS_2016_highRes.png");
+      brdImage =
+          AssetImage("./assets/images/A_2016-B_2016-OS_2016_highRes.png");
     }
     setState(() {});
   }
 
   void sendToMoon() async {
-    _bleService.writeData(mirror ? problem.mirrorHoldsIndexes() : problem.holds);
+    print("send to moon called");
+    _bleService
+        .writeData(mirror ? problem.mirrorHoldsIndexes() : problem.holds);
   }
 
   void deleteProblem() {
+    print("deleteProblem called");
     showDialog(
       context: context,
       builder: (context) {
@@ -106,6 +124,7 @@ class _ProblemScreenState extends State<ProblemScreen> {
   }
 
   void toggleLiked() {
+    print("toggleLiked called");
     if (liked) {
       problem.dislike();
       liked = false;
@@ -117,12 +136,15 @@ class _ProblemScreenState extends State<ProblemScreen> {
   }
 
   void nextProblem() {
+    print("nextProblem called");
     if (this.widget.problems.isEmpty) return;
     setState(() {
       if (currentHistoryIndex == history.length - 1) {
-        problem = this.widget.problems.removeAt(Random().nextInt(this.widget.problems.length));
+        problem = this
+            .widget
+            .problems
+            .removeAt(Random().nextInt(this.widget.problems.length));
         history.add(problem);
-        if (!this.widget.fromHistory) problem.addToHistory();
         currentHistoryIndex = history.length - 1;
       } else {
         currentHistoryIndex++;
@@ -130,16 +152,20 @@ class _ProblemScreenState extends State<ProblemScreen> {
       }
       liked = problem.isLiked();
       mirror = false;
+      problemOpened = DateTime.now();
+      resetTimer();
     });
   }
 
   void previousProblem() {
+    print("previousProblem called");
     setState(() {
       if (currentHistoryIndex > 0) {
         currentHistoryIndex--;
         problem = history[currentHistoryIndex];
         liked = problem.isLiked();
         mirror = false;
+        problemOpened = DateTime.now();
       }
     });
   }
@@ -175,182 +201,207 @@ class _ProblemScreenState extends State<ProblemScreen> {
               ],
             ),
             Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    children: [
-                      CustomCard(
-                        padding: 10,
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Text((currentHistoryIndex + 1).toString() + "/" + history.length.toString(),
-                                    style: TextStyle(color: _theme.foreground)),
-                                Expanded(
-                                  child: Text(
-                                    problem.getGradeString(),
-                                    style: TextStyle(color: _theme.linksColor),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    problem.suitedForCustomBoard()
-                                        ? Icon(
-                                            Icons.check_circle_outline,
-                                            color: Colors.greenAccent,
-                                          )
-                                        : SizedBox(),
-                                    problem.mirrorSuitedForCustomBoard()
-                                        ? Transform(
-                                            alignment: Alignment.topCenter,
-                                            transform: Matrix4.rotationY(math.pi),
-                                            child: Icon(
-                                              Icons.check_circle_outline,
-                                              color: Colors.yellowAccent,
-                                            ),
-                                          )
-                                        : SizedBox(),
-                                  ],
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    problem.getSuffixName(),
-                                    style: TextStyle(color: _theme.accentColor),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            problem.getPrefixMethod() == null
-                                ? SizedBox()
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: problem.methodIcons(_theme.foreground),
-                                      ),
-                                      Text(problem.getPrefixMethod(), style: TextStyle(color: _theme.foreground)),
-                                    ],
-                                  ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    CustomCard(
+                      padding: 10,
+                      child: Column(
                         children: [
-                          SickButton(
-                            child: Icon(Icons.fullscreen_exit, color: _theme.foreground),
-                            onPress: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                          problem.holdsSetup == 999
-                              ? SickButton(child: Icon(Icons.delete_outline, color: Colors.red), onPress: deleteProblem)
-                              : SickButton(child: Icon(Icons.delete_outline, color: _theme.disabled), onPress: () {}),
-                          SickButton(
-                            child: Icon(Icons.swap_horiz, color: !customBoard ? Colors.yellow : Colors.blue),
-                            onPress: () {
-                              customBoard = !customBoard;
-                              checkImage();
-                            },
-                          ),
-                          SickButton(child: Icon(Icons.send, color: _theme.accentColor), onPress: sendToMoon),
-                        ],
-                      ),
-                      Center(
-                        child: GestureDetector(
-                          onDoubleTap: () {
-                            setState(() => mirror = !mirror);
-                            sendToMoon();
-                          },
-                          onVerticalDragEnd: (details) {
-                            if (details.primaryVelocity < 0) {
-                              sendToMoon();
-                            }
-                          },
-                          onHorizontalDragEnd: (details) {
-                            if (details.primaryVelocity > 0) {
-                              previousProblem();
-                            } else if (details.primaryVelocity < 0) {
-                              nextProblem();
-                            }
-                          },
-                          child: Stack(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Container(
-                                margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-                                padding: EdgeInsets.only(
-                                  top: (imgH / 16.8),
-                                  left: (screenW / 9.5),
-                                  right: (screenW / 21.5),
-                                  bottom: (imgH / 26),
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(10),
-                                  image: DecorationImage(
-                                    image: brdImage,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                child: GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: ScrollPhysics(),
-                                  clipBehavior: Clip.none,
-                                  itemCount: (holdsHorizontal * holdsVertical).toInt(),
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: holdsHorizontal.toInt(),
-                                  ),
-                                  itemBuilder: (context, index) {
-                                    List<Hold> holds = mirror ? problem.mirrorHolds() : problem.getHolds();
-                                    int hIn = holds.indexWhere((e) => Utils.convert2DTo1D(e.location, holdsHorizontal.toInt()) == index);
-                                    Color outlineColor = Colors.transparent;
-
-                                    if (hIn != -1) {
-                                      Hold h = holds[hIn];
-                                      switch (h.holdType) {
-                                        case HoldType.finishHold:
-                                          outlineColor = Colors.redAccent;
-                                          break;
-                                        case HoldType.startHold:
-                                          outlineColor = Colors.greenAccent;
-                                          break;
-                                        case HoldType.normalHold:
-                                          outlineColor = Colors.blueAccent;
-                                          break;
-                                      }
-                                    }
-
-                                    return CustomPaint(painter: DrawCircle(outlineColor));
-                                  },
+                              Text(
+                                  (currentHistoryIndex + 1).toString() +
+                                      "/" +
+                                      history.length.toString(),
+                                  style: TextStyle(color: _theme.foreground)),
+                              Expanded(
+                                child: Text(
+                                  problem.getGradeString(),
+                                  style: TextStyle(color: _theme.linksColor),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
-                              Positioned(
-                                top: 8,
-                                child: mirror
-                                    ? Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Transform(
-                                          alignment: Alignment.topCenter,
-                                          transform: Matrix4.rotationY(math.pi),
-                                          child: Icon(
-                                            Icons.check_circle_outline,
-                                            color: Colors.yellowAccent,
-                                          ),
-                                        ),
-                                      )
-                                    : SizedBox(),
+                              Row(
+                                children: [
+                                  if (problem.isInHistory())
+                                    Icon(
+                                      Icons.history,
+                                      color: Colors.blue,
+                                    ),
+                                  if (problem.suitedForCustomBoard())
+                                    Icon(
+                                      Icons.check_circle_outline,
+                                      color: Colors.greenAccent,
+                                    ),
+                                  if (problem.mirrorSuitedForCustomBoard())
+                                    Transform(
+                                      alignment: Alignment.topCenter,
+                                      transform: Matrix4.rotationY(math.pi),
+                                      child: Icon(
+                                        Icons.check_circle_outline,
+                                        color: Colors.yellowAccent,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              Expanded(
+                                child: Text(
+                                  problem.getSuffixName(),
+                                  style: TextStyle(color: _theme.accentColor),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ],
                           ),
+                          problem.getPrefixMethod() == null
+                              ? SizedBox()
+                              : Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: problem
+                                          .methodIcons(_theme.foreground),
+                                    ),
+                                    Text(problem.getPrefixMethod(),
+                                        style: TextStyle(
+                                            color: _theme.foreground)),
+                                  ],
+                                ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        SickButton(
+                          child: Icon(Icons.fullscreen_exit,
+                              color: _theme.foreground),
+                          onPress: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        problem.holdsSetup == 999
+                            ? SickButton(
+                                child: Icon(Icons.delete_outline,
+                                    color: Colors.red),
+                                onPress: deleteProblem)
+                            : SickButton(
+                                child: Icon(Icons.delete_outline,
+                                    color: _theme.disabled),
+                                onPress: () {}),
+                        SickButton(
+                          child: Icon(Icons.swap_horiz,
+                              color:
+                                  !customBoard ? Colors.yellow : Colors.blue),
+                          onPress: () {
+                            customBoard = !customBoard;
+                            checkImage();
+                          },
+                        ),
+                        SickButton(
+                            child: Icon(Icons.send, color: _theme.accentColor),
+                            onPress: sendToMoon),
+                      ],
+                    ),
+                    Center(
+                      child: GestureDetector(
+                        onLongPressEnd: (details) => sendToMoon(),
+                        onDoubleTap: () {
+                          setState(() => mirror = !mirror);
+                          sendToMoon();
+                        },
+                        onHorizontalDragEnd: (details) {
+                          if (details.primaryVelocity > 0) {
+                            previousProblem();
+                          } else if (details.primaryVelocity < 0) {
+                            nextProblem();
+                          }
+                        },
+                        child: Stack(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 0, vertical: 10),
+                              padding: EdgeInsets.only(
+                                top: (imgH / 16.8),
+                                left: (screenW / 9.5),
+                                right: (screenW / 21.5),
+                                bottom: (imgH / 26),
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(10),
+                                image: DecorationImage(
+                                  image: brdImage,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              child: GridView.builder(
+                                shrinkWrap: true,
+                                physics: ScrollPhysics(),
+                                clipBehavior: Clip.none,
+                                itemCount:
+                                    (holdsHorizontal * holdsVertical).toInt(),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: holdsHorizontal.toInt(),
+                                ),
+                                itemBuilder: (context, index) {
+                                  List<Hold> holds = mirror
+                                      ? problem.mirrorHolds()
+                                      : problem.getHolds();
+                                  int hIn = holds.indexWhere((e) =>
+                                      Utils.convert2DTo1D(e.location,
+                                          holdsHorizontal.toInt()) ==
+                                      index);
+                                  Color outlineColor = Colors.transparent;
+
+                                  if (hIn != -1) {
+                                    Hold h = holds[hIn];
+                                    switch (h.holdType) {
+                                      case HoldType.finishHold:
+                                        outlineColor = Colors.redAccent;
+                                        break;
+                                      case HoldType.startHold:
+                                        outlineColor = Colors.greenAccent;
+                                        break;
+                                      case HoldType.normalHold:
+                                        outlineColor = Colors.blueAccent;
+                                        break;
+                                    }
+                                  }
+
+                                  return CustomPaint(
+                                      painter: DrawCircle(outlineColor));
+                                },
+                              ),
+                            ),
+                            Positioned(
+                              top: 8,
+                              child: mirror
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Transform(
+                                        alignment: Alignment.topCenter,
+                                        transform: Matrix4.rotationY(math.pi),
+                                        child: Icon(
+                                          Icons.check_circle_outline,
+                                          color: Colors.yellowAccent,
+                                        ),
+                                      ),
+                                    )
+                                  : SizedBox(),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             )
@@ -373,7 +424,8 @@ class DrawCircle extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawCircle(Offset(size.width / 2, size.height / 2), size.width / 2 + 5, _paint);
+    canvas.drawCircle(
+        Offset(size.width / 2, size.height / 2), size.width / 2 + 5, _paint);
   }
 
   @override

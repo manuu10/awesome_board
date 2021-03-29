@@ -73,14 +73,16 @@ class _ProblemWidgetState extends State<ProblemWidget> {
                             ? Row(
                                 children: [
                                   Text(
-                                    DateFormat("yyyy - MM - dd").format(problem.dateTime),
+                                    DateFormat("yyyy - MM - dd")
+                                        .format(problem.dateTime),
                                     style: TextStyle(
                                       color: theme.attributesColor,
                                     ),
                                   ),
                                   SizedBox(width: 20),
                                   Text(
-                                    DateFormat("HH:mm").format(problem.dateTime),
+                                    DateFormat("HH:mm")
+                                        .format(problem.dateTime),
                                     style: TextStyle(
                                       color: theme.keywordsColor,
                                     ),
@@ -130,6 +132,11 @@ class _ProblemWidgetState extends State<ProblemWidget> {
                                 color: Colors.pink,
                               )
                             : SizedBox(),
+                        if (problem.isInHistory())
+                          Icon(
+                            Icons.history,
+                            color: Colors.blue,
+                          ),
                         problem.mirrorSuitedForCustomBoard()
                             ? Transform(
                                 alignment: Alignment.center,
@@ -143,7 +150,9 @@ class _ProblemWidgetState extends State<ProblemWidget> {
                         problem.suitedForCustomBoard()
                             ? Icon(
                                 Icons.check_circle_outline,
-                                color: problem.holdsSetup == 999 ? Colors.blueAccent : Colors.green,
+                                color: problem.holdsSetup == 999
+                                    ? Colors.blueAccent
+                                    : Colors.green,
                               )
                             : SizedBox(),
                       ],

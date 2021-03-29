@@ -79,14 +79,23 @@ class Problem {
     if (this.holdsType == null) this.holdsType = 4;
   }
 
+  @override
+  bool operator ==(rhs) {
+    return rhs is Problem && rhs.strId == this.strId;
+  }
+
   ProblemMethod getMethod() {
     String prefix = getPrefixMethod();
     if (prefix == null) return ProblemMethod.none;
     prefix = prefix.trim().toLowerCase();
-    if (prefix.toLowerCase() == "feet follow hands") return ProblemMethod.feetFollowHands;
-    if (prefix.toLowerCase() == "feet follow hands + screw ons") return ProblemMethod.feetFollowHandsScrewOn;
-    if (prefix.toLowerCase() == "footless + kickboard") return ProblemMethod.footlessKickboard;
-    if (prefix.toLowerCase() == "screw ons only") return ProblemMethod.screwOnsOnly;
+    if (prefix.toLowerCase() == "feet follow hands")
+      return ProblemMethod.feetFollowHands;
+    if (prefix.toLowerCase() == "feet follow hands + screw ons")
+      return ProblemMethod.feetFollowHandsScrewOn;
+    if (prefix.toLowerCase() == "footless + kickboard")
+      return ProblemMethod.footlessKickboard;
+    if (prefix.toLowerCase() == "screw ons only")
+      return ProblemMethod.screwOnsOnly;
 
     return ProblemMethod.none;
   }
@@ -94,16 +103,19 @@ class Problem {
   List<Widget> methodIcons(Color c) {
     double size = 14;
     double spacing = 5;
-    if (getMethod() == ProblemMethod.feetFollowHands || getMethod() == ProblemMethod.feetFollowHandsScrewOn) {
+    if (getMethod() == ProblemMethod.feetFollowHands ||
+        getMethod() == ProblemMethod.feetFollowHandsScrewOn) {
       var list = <Widget>[
         FaIcon(FontAwesomeIcons.shoePrints, color: Colors.yellow, size: size),
         SizedBox(width: spacing),
-        FaIcon(FontAwesomeIcons.solidHandPaper, color: Color(0xffffdfc4), size: size),
+        FaIcon(FontAwesomeIcons.solidHandPaper,
+            color: Color(0xffffdfc4), size: size),
       ];
       if (getMethod() == ProblemMethod.feetFollowHandsScrewOn)
         list.addAll([
           SizedBox(width: spacing * 2),
-          FaIcon(FontAwesomeIcons.plus, color: Colors.greenAccent, size: size - 2),
+          FaIcon(FontAwesomeIcons.plus,
+              color: Colors.greenAccent, size: size - 2),
           SizedBox(width: spacing * 1.5),
           FaIcon(FontAwesomeIcons.stop, color: c, size: size),
         ]);
@@ -115,7 +127,8 @@ class Problem {
         SizedBox(width: spacing),
         FaIcon(FontAwesomeIcons.shoePrints, color: c, size: size),
         SizedBox(width: spacing * 2),
-        FaIcon(FontAwesomeIcons.plus, color: Colors.greenAccent, size: size - 2),
+        FaIcon(FontAwesomeIcons.plus,
+            color: Colors.greenAccent, size: size - 2),
         SizedBox(width: spacing * 1.5),
         FaIcon(FontAwesomeIcons.gripHorizontal, color: c, size: size),
       ];
@@ -156,6 +169,11 @@ class Problem {
   void addToHistory() async {
     var box = Hive.box<Problem>("history");
     await box.put(DateTime.now().toString(), this);
+  }
+
+  bool isInHistory() {
+    var box = Hive.box<Problem>("history");
+    return box.values.contains(this);
   }
 
   Widget getWidget(List<Problem> problems, {bool fromHistory = false}) {
@@ -305,7 +323,8 @@ class Problem {
 
   bool mirrorSuitedForCustomBoard() {
     var availableHolds = getCustomHoldIndexes();
-    var flipped = mirrorHolds().map((e) => Utils.flipOverY(e.location, 17)).toList();
+    var flipped =
+        mirrorHolds().map((e) => Utils.flipOverY(e.location, 17)).toList();
     List<int> lHolds = flipped.map((e) => Utils.convert2DTo1D(e, 11)).toList();
     for (int i = 0; i < lHolds.length; i++) {
       if (!availableHolds.contains(lHolds[i])) return false;
@@ -457,7 +476,8 @@ class Problem {
     int startHolds = 2;
     int normalHolds = 5;
     int finishHolds = 1;
-    var startSection = availableHoldsCustomBoard.where((e) => e < (5 * 11)).toList();
+    var startSection =
+        availableHoldsCustomBoard.where((e) => e < (5 * 11)).toList();
     for (int i = 0; i < startHolds; i++) {
       int index = startSection[rnd.nextInt(startSection.length)];
       int tries = 0;
@@ -478,7 +498,9 @@ class Problem {
       holds.add(1);
     }
 
-    var normalSection = availableHoldsCustomBoard.where((e) => e < (17 * 11) && e >= (5 * 11)).toList();
+    var normalSection = availableHoldsCustomBoard
+        .where((e) => e < (17 * 11) && e >= (5 * 11))
+        .toList();
     for (int i = 0; i < normalHolds; i++) {
       int index = normalSection[rnd.nextInt(normalSection.length)];
       int tries = 0;
@@ -498,7 +520,9 @@ class Problem {
       holds.add(index);
       holds.add(0);
     }
-    var finishSection = availableHoldsCustomBoard.where((e) => e < (18 * 11) && e >= (17 * 11)).toList();
+    var finishSection = availableHoldsCustomBoard
+        .where((e) => e < (18 * 11) && e >= (17 * 11))
+        .toList();
     for (int i = 0; i < finishHolds; i++) {
       int index = finishSection[rnd.nextInt(finishSection.length)];
       int tries = 0;
