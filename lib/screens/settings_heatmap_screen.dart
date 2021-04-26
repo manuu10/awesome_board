@@ -18,7 +18,6 @@ class SettingsHeatmapScreen extends StatefulWidget {
 }
 
 class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
-  CustomTheme _theme = CustomTheme.getThemeFromStorage();
   final double holdsHorizontal = 11;
   final double holdsVertical = 18;
   String message = "";
@@ -45,8 +44,10 @@ class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
       var holdscustom = Problem.getCustomHoldIndexes();
       mapp.removeWhere((key, value) => holdscustom.contains(key));
     }
-    var flippedHolds = mapp.map((k, v) => MapEntry(Utils.convert1DTo2D(k, 11), v));
-    flippedHolds = flippedHolds.map((k, v) => MapEntry(Utils.flipOverY(k, 17), v));
+    var flippedHolds =
+        mapp.map((k, v) => MapEntry(Utils.convert1DTo2D(k, 11), v));
+    flippedHolds =
+        flippedHolds.map((k, v) => MapEntry(Utils.flipOverY(k, 17), v));
     holds = flippedHolds.map((k, v) => MapEntry(Utils.convert2DTo1D(k, 11), v));
     _max = holds.values.reduce(max);
     _min = holds.values.reduce(min);
@@ -157,9 +158,12 @@ class _SettingsHeatmapScreenState extends State<SettingsHeatmapScreen> {
                         crossAxisCount: holdsHorizontal.toInt(),
                       ),
                       itemBuilder: (context, index) {
-                        int value = holds.keys.contains(index) ? holds[index] : -1;
+                        int value =
+                            holds.keys.contains(index) ? holds[index] : -1;
                         return GestureDetector(
-                          child: CustomPaint(painter: DrawCircle(_min, _max, value, showNumbers)),
+                          child: CustomPaint(
+                              painter:
+                                  DrawCircle(_min, _max, value, showNumbers)),
                         );
                       },
                     ),
@@ -191,13 +195,18 @@ class DrawCircle extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Rect rect = Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2);
+    Rect rect = Rect.fromCircle(
+        center: Offset(size.width / 2, size.height / 2),
+        radius: size.width / 2);
     canvas.drawRect(rect, _paint);
     if (_value != -1 && _numbers) {
       TextSpan span = new TextSpan(
-        style: new TextStyle(color: Colors.white, fontSize: size.width / 3, shadows: [
-          Shadow(blurRadius: 10, color: Colors.black),
-        ]),
+        style: new TextStyle(
+            color: Colors.white,
+            fontSize: size.width / 3,
+            shadows: [
+              Shadow(blurRadius: 10, color: Colors.black),
+            ]),
         text: _value.toString(),
       );
       TextPainter tp = new TextPainter(
@@ -235,10 +244,13 @@ class DrawCircle extends CustomPainter {
       if (value < currC.val) {
         ColorPoint prevC = color[max(0, i - 1)];
         double valueDiff = (prevC.val - currC.val);
-        double fractBetween = (valueDiff == 0) ? 0 : (value - currC.val) / valueDiff;
+        double fractBetween =
+            (valueDiff == 0) ? 0 : (value - currC.val) / valueDiff;
         red = (prevC.col.red - currC.col.red) * fractBetween + currC.col.red;
-        green = (prevC.col.green - currC.col.green) * fractBetween + currC.col.green;
-        blue = (prevC.col.blue - currC.col.blue) * fractBetween + currC.col.blue;
+        green = (prevC.col.green - currC.col.green) * fractBetween +
+            currC.col.green;
+        blue =
+            (prevC.col.blue - currC.col.blue) * fractBetween + currC.col.blue;
         return Color.fromRGBO(red.toInt(), green.toInt(), blue.toInt(), 1);
       }
     }
