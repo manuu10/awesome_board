@@ -44,8 +44,8 @@ Ein Teil von dem Projekt ist die App zur Steuerung der LEDs an der Wand und die 
 
 #### **Entwicklungsumgebung**
 
-Für die Entwicklung der App wurde das Framework [Flutter]() von Google genutzt.
-Als Editor [Visual Studio Code]() von Microsoft
+Für die Entwicklung der App wurde das Framework [Flutter](https://flutter.dev/) von Google genutzt.
+Als Editor [Visual Studio Code](https://code.visualstudio.com/) von Microsoft
 
 ### **Mikrocontroller/LEDs**
 
