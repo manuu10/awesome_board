@@ -27,9 +27,7 @@ Eine bereits vorhandene Kletterwand zuhause :D
 
 #
 
-## **Projekt-Komponenten**
-
-#
+# **Projekt-Komponenten**
 
 ### **Android/iOS App**
 
@@ -55,7 +53,7 @@ Der andere Teil vom Projekt ist der Mikrocontroller welcher an der Kletterwand a
 
 Als Mikrocontroller habe ich den ESP32 verwendet, da dieser bereits onboard über bluetooth verfügt
 
-Mikrocontroller Git repository [AwesomeBoardBluetooth](http://github.com/manuu10/Monnboard_Bluetooth)
+Mikrocontroller Git repository [AwesomeBoardBluetooth](https://github.com/manuu10/AwesomeBoardBluetooth)
 
 #### **Entwicklungsumgebung**
 
