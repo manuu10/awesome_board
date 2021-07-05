@@ -120,7 +120,7 @@ Man kann zudem auch noch eine Zufallsroute von der App erstellen lassen. als Par
 
 # **Weitere Bilder zu dem Projekt**
 
-## 3D Modell von dem Gehäuse für die LEDs
+## **3D Modell von dem Gehäuse für die LEDs**
 
 <img src="./screenshots/ledcase.png" alt="drawing" width="300"/>
 <img src="./screenshots/ledcase_cut.png" alt="drawing" width="300"/>
@@ -131,4 +131,17 @@ Das Gehäuse für die Leds um diese in der Wand zu montieren.
 
 Das schwarze Teil ist das wo die Led eingelegt wird und das transparente wird von vorne mit rein geschoben um die LEDs zu schützen
 
-## Hier folgen noch weitere Bilder/Videos von der Wand in Aktion, allerdings muss ich diese noch aufnehmen.
+## **Bilder Kletterwand**
+
+<img src="./screenshots/example_problem_phone_screen.png" alt="drawing" width="300"/>
+<img src="./screenshots/example_problem.jpg" alt="drawing" width="300"/>
+
+##
+
+links das problem auf dem handy und rechts auf die LED's an der Kletterwand übertragen
+
+## **Rückseite/Verkabelung Kletterwand**
+
+<img src="./screenshots/back_of_wall.jpg" alt="drawing" width="300"/>
+<img src="./screenshots/e_box_2.jpg" alt="drawing" width="300"/>
+<img src="./screenshots/e_box_1.jpg" alt="drawing" width="300"/>
