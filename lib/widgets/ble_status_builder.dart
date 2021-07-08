@@ -1,5 +1,4 @@
 import 'package:awesome_board/models/custom_theme.dart';
-import 'package:awesome_board/services/ble_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ble_lib/flutter_ble_lib.dart';
 
@@ -7,6 +6,7 @@ class BleStatusBuilder extends StatelessWidget {
   final Stream<PeripheralConnectionState> bleState;
 
   const BleStatusBuilder({Key key, this.bleState}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     var _theme = CustomTheme.getThemeFromStorage();
@@ -33,8 +33,10 @@ class BleStatusBuilder extends StatelessWidget {
             initialData: PeripheralConnectionState.disconnected,
             builder: (context, snapshot) {
               var type = snapshot.data;
-              if (type == PeripheralConnectionState.connected) return Icon(Icons.check_circle, color: Colors.greenAccent);
-              if (type == PeripheralConnectionState.connecting || type == PeripheralConnectionState.disconnecting) {
+              if (type == PeripheralConnectionState.connected)
+                return Icon(Icons.check_circle, color: Colors.greenAccent);
+              if (type == PeripheralConnectionState.connecting ||
+                  type == PeripheralConnectionState.disconnecting) {
                 return SizedBox(
                   height: 14,
                   width: 14,

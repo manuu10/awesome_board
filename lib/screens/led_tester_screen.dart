@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:awesome_board/bloc/theme_bloc.dart';
 import 'package:awesome_board/models/custom_theme.dart';
 import 'package:awesome_board/services/ble_service.dart';
@@ -10,7 +8,6 @@ import 'package:awesome_board/widgets/esp32_mode.dart';
 import 'package:awesome_board/widgets/gradient_icon.dart';
 import 'package:awesome_board/widgets/sick_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_ble_lib/flutter_ble_lib.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LedTesterScreen extends StatefulWidget {
@@ -23,13 +20,11 @@ class LedTesterScreen extends StatefulWidget {
 
 class _LedTesterScreenState extends State<LedTesterScreen> {
   final BleService _bleService = BleService();
-  StreamSubscription<PeripheralConnectionState> _bleSubscription;
 
   @override
   void dispose() async {
     super.dispose();
     _bleService.stopReading();
-    await _bleSubscription.cancel();
     await _bleService.cleanup();
   }
 
@@ -37,9 +32,6 @@ class _LedTesterScreenState extends State<LedTesterScreen> {
   void initState() {
     super.initState();
     _bleService.startReading();
-    _bleSubscription = _bleService.streamInformation.listen((event) {
-      setState(() {});
-    });
   }
 
   void switchToMoonBoard() => _bleService.writeData("moonMode");
